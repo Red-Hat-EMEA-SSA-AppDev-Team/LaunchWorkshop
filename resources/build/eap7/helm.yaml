@@ -1,0 +1,3 @@
+build:
+  uri: https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker
+  ref: jee7-eap7
