@@ -5,10 +5,18 @@ cargo-intro
 cargo-build
 
 *   \-Dwildfly.statistics-enabled=true
-*   new-app with BC ??
+*   new-app with BC ?? -→ new-app with IS in deploy
+*   \<doc JBoss EAP XP>
 
 CRD and oc explain
 
 EAP Operator, Tekton and GitOps
 
-multicontainers pods
+multi-containers pods
+
+Image stream security (lookup)
+
+If you use an external registry
+
+*   cargo-build
+*   cargo-deploy

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: cargo-app-yaml
+    app.kubernetes.io/component: cargo-app-yaml
+    app.kubernetes.io/instance: cargo-app-yaml
+    app.kubernetes.io/name: cargo-app-yaml
+  name: cargo-app-yaml
+spec:
+  internalTrafficPolicy: Cluster
+  ports:
+  - name: 8080-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: 8443-tcp
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+  - name: 8778-tcp
+    port: 8778
+    protocol: TCP
+    targetPort: 8778
+  selector:
+    app: cargo-app-yaml
+    deployment: cargo-app-yaml
+  type: ClusterIP

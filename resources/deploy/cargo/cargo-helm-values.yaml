@@ -1,0 +1,3 @@
+app:
+  name: cargo-app-helm
+  image: cargo-app:latest
