@@ -10,6 +10,7 @@ Openshift
 *   Access by dev and ops
 *   Namespaces and users
 *   Generic user with registry-editor right
+*   EAP Operator installed
 
 Choices
 

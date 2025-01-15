@@ -4,6 +4,6 @@
 
 [Openshift objects and yaml files](ocp/ocp-yaml.md)
 
-[Workshop with a Spring legacy application](spring/strangler-intro.md)
+[Workshop with a Spring legacy application](strangler/strangler-index.md)
 
-[Workshop with an EAP7 legacy application](eap7/cargo-index.md)
+[Workshop with an EAP7 legacy application](cargo/cargo-index.md)

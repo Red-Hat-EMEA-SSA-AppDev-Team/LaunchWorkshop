@@ -1,3 +1,5 @@
+## Building applications
+
 Openshift offers multiple ways to mak a Conainer Image from an application.
 
 One way is to use the Openshift S2I process.
@@ -152,31 +154,7 @@ TODO
 
 \-Dwildfly.statistics-enabled=true
 
-Openshift new-app command
-
-We've already see a deployment from the Web Console, and how it already automated a few tasks such as the creation of Services and Routes.
-
-The Openshift new-app command is behind that.  This is a command that acts as a shortcut to perform build and deployment steps altogether quickly.
-
-The command can take many forms:
-
-*   Build and deploy from source
-
-oc new-app [eap74-openjdk11-openshift-rhel8](http://registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8)~https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker#jee7-eap7 --name=cargo-newapp-source
-
-*   From an existing build
-
-TODO
-
-We'll see more forms later in the context of deploying images
-
-Notice that the "-o yaml" option allows to make a dry-run.
-
-```plaintext
-oc new-app … -o yaml
-```
-
-Using BuilderImage directly
+### Using BuilderImage directly
 
 Some BuilderImage are directly accssible from th WebConsole, within the Developer perspective.
 

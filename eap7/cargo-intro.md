@@ -1,4 +1,4 @@
-### The Cargo Tracker app
+## The Cargo Tracker application
 
 The Cargo Tracker application is a JEE7 legacy monolith that runs on a Glassfish and requires a java 8 runtime.
 
@@ -6,7 +6,7 @@ The source code is available here, under the javaee7 branch:
 
 [https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker/tree/javaee7](https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker/tree/jee7-eap7)
 
-### Running the Cargo Tracker app locally
+### Running the Cargo Tracker application locally
 
 ```plaintext
 git clone https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker
@@ -32,7 +32,7 @@ The source code is available here, under the jee7-eap7 branch:
 
 [https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker/tree/jee7-eap7](https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker/tree/jee7-eap7)
 
-### Running the Cargo Tracker EAP app locally
+### Running the Cargo Tracker EAP application locally
 
 ```plaintext
 git clone https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker

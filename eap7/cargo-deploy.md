@@ -1,3 +1,5 @@
+## Deploying Applications
+
 In this section, we'll explore ways to turn a container image into a running pod.
 
 We've already seen the first one, which is via the Web Console.
@@ -119,6 +121,12 @@ More info on Openshift Templates can be found here:
 
 [https://docs.openshift.com/container-platform/4.9/openshift_images/using-templates.html](https://docs.openshift.com/container-platform/4.9/openshift_images/using-templates.html)
 
+#### Working with Databases
+
+Having seen that templates can be used to create databases, let's have a look at a "production-ready" vrsion of the tracker application, using an external database to enable horizontal scaling.
+
+[Working with databases](cargo-db.md)
+
 #### Deploy with Helm
 
 Templates can only do basic variable substitutions.  They are files, so doing proper versioning with them is a hard task.
@@ -150,7 +158,7 @@ cp resources/deploy/cargo/cargo-service-helm.yaml cargo-from-helm/templates/
 cp resources/deploy/cargo/cargo-route-helm.yaml cargo-from-helm/templates/
 ```
 
-Edit values.yaml to set a value for the “appname” and “appimage” parameters.
+Edit values.yaml to set a value for the “app.name” and “app.image” parameters.
 
 ```plaintext
 echo "app:" > cargo-from-helm/values.yaml
@@ -158,7 +166,11 @@ echo "  name: cargo-app-helm" >> cargo-from-helm/values.yaml
 echo "  image: 'cargo-app:latest'" >> cargo-from-helm/values.yaml
 ```
 
+```plaintext
 cat cargo-from-helm/values.yaml
+```
+
+This should give the following output:
 
 ```plaintext
 app:
@@ -267,6 +279,74 @@ Let's go back again to the build phase to see yet other options to creating imag
 
 ### Deploying with an Operator
 
-#### Use NetworkPolicies
+[Introduction to Openshift Operators](../ocp/ocp-operators.md)
 
-### Using NodePort
+Operators are made to manage Products rather than Applications.  They are management objects that automate Day2 operations, allowing administrators to perform transparent install, update, upgrade, scale up, scale down operations while guaranteeing consistency, backups duing topology migrations.
+
+In the particular case of EAP, Openshift comes with an associated Operator.
+
+From the Administrator perspective of the Web Console:
+
+```plaintext
+Go to the Operators tab on th left
+Select "Installed Operators"
+Select "Jboss EAP"
+Go to the WildflyServer tab
+Click on "Create WildflyServer"
+If not yet the case, switch to the Form view
+```
+
+Then
+
+```plaintext
+Give th instance the name “cargo-app-op”
+Set 1 replicas
+Use "cargo-app:latest" as the Application Image
+Then click "Create"
+```
+
+Check that the application has been deployed
+
+```plaintext
+oc get wildflyserver
+```
+
+We can verify that a pod is now running
+
+```plaintext
+oc get pods | grep cargo-app-op
+```
+
+Which we can access with the Route link, appending /cargo-tracker to the shown URL
+
+```plaintext
+oc get route | grep cargo-app-op
+```
+
+We can see that, though the esult seems to be the same, things seem to have been done much differently.
+
+a. Similarly to th EAP Helm Chart and the EAP Template, healthchecks have been automatically configured
+
+[Monitoring the Cargo Tracker application](cargo-monitor.md)
+
+b. Multiple Services have been created
+
+    There is a Service for the application, an admin one, and a headless one that does not have any IP
+
+```plaintext
+oc get services  | grep cargo-app-op
+```
+
+[Introduction to network traffic and pod networking on Openshift](../ocp/ocp-svcroute.md)
+
+c. The pod is not named wihth a random string but with a fixed name, ending with a 0
+
+```plaintext
+oc get pods | grep cargo-app | grep Running
+```
+
+[Introduction to Statefulness on Openshift](ocp/ocp-net.md) 
+
+d. Volumes have been configured
+
+[Managing application data and application configuration](cargo-config.md)
