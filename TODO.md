@@ -16,6 +16,10 @@ multi-containers pods
 
 Image stream security (lookup)
 
+ID and permission for volume writing and sharing
+
+*   cargo-config
+
 If you use an external registry
 
 *   cargo-build

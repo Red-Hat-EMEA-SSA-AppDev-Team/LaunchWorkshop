@@ -18,3 +18,4 @@ Choices
 *   Using Prometheus user workload ?
 *   Using Loki (requires Minio), or an external solution
 *   Using Tempo (requires Minio), or an external solution
+*   Storage class allowing the on-demand creation of RWO PV

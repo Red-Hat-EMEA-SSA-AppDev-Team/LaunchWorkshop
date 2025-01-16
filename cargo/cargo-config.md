@@ -202,49 +202,84 @@ Go to the terminal of the newly created pod to check the presence of the variabl
 env | grep -i eap_
 ```
 
-### Volumes, filesystems and NFS
+### Volumes, filesystems and storage
 
-Some applications needs to use the filesystem to read and write files.  Ephemeral data can be place on the filesystem of the pods, which would not suvive a pod restart.  Persistent data, however, must be in a storage that persist across pod restarts.  It cannot be the node filesystem either, as there is no guarantee that the pod will be assigned to the same node upon restarts.  It has to be a emote filesystem.
+Some applications or products might need to use the filesystem to read and write files. 
 
-[ocp-pv.md](ocp-pv.md) 
+This is obviously the case for databases, that use block storage.  That is also the case for the internal Image registry, that uses object storage.  Other applications might also need to use file storage.
 
-A new or existing data folder can be added to an application Image with the below configuration:
+At install time, Openshift should integrate with one or more network-based Storage solution.
+
+The platform abstracts by an object called PersistentVolume, which are the responsibility of the administrators.  Developers use PersistentVolumeClaim objects, which maps to PersistentVolume.
+
+[Introduction to Openshift storage](../ocp/ocp-storage.md)
+
+Those objects can be created and/or displayed in the Administrator perspective of the Web Console, under the “Storage” tab.
+
+Again, the Deployment object, responsible for configuring the pod at the moment of its instantiation, will be the object containing the information about what filesystem to mount and where.
+
+ The Deployment object will contain the below configuration.
 
 ```plaintext
 spec:
- &nbsp;&nbsp;&nbsp;containers:
- &nbsp;&nbsp;  - name: cargo-container
- &nbsp;&nbsp;&nbsp;&nbsp;  image: cargo-app:latest
- &nbsp;&nbsp;&nbsp;&nbsp;  volumeMounts:
- &nbsp;&nbsp;&nbsp;&nbsp;  - mountPath: /data
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  name: cargo-volume
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- mountPath: /data2
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  name: cargo-volume2
- &nbsp;&nbsp;&nbsp;volumes:
- &nbsp;&nbsp;  - persistentVolumeClaim:
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;claimName: cargo-claim
- &nbsp;&nbsp;&nbsp;&nbsp;  name: cargo-volume
- &nbsp;&nbsp;  - emptyDir: {}
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name: cargo-volume2
+  containers:
+  - name: cargo-app-nodesto
+    image: cargo-app:latest
+    volumeMounts:
+    - mountPath: /mydata
+      name: cargo-volume
+  volumes:
+  - persistentVolumeClaim:
+      claimName: cargo-claim
+      name: cargo-volume
 ```
 
-From the Web Console terminal, check that the filesystems are mounted:
+The PersistentVolumeClaim can be create from the Administrator perspective of the web console, under the Storage/PersistentVolumeClaim tab, using the “Create PersistentVolumeClaim” button.
+
+The properties will be:
 
 ```plaintext
-ls /
-echo “Is it there” &gt; /data/file1
-echo “Is it there” &gt; /data2/file2
+storage-class: ##default
+name: cargo-claim
+size: 1GB
+mode: filesystem
 ```
 
-Restart the pod and go back to the pod Terminal
+Alternatively, as any Openshift object, it can be created from its yaml definition:
 
 ```plaintext
-ls /data
-cat /data/file1
-ls /data2
+oc apply -f resources/config/cargo/cargo-claim.yaml
+```
+
+```plaintext
+oc apply -f resources/config/cargo/cargo-deployment-nodesto.yaml
+```
+
+You can check that the pod has been created with an additional filesystem directory by going to the pod terminal
+
+```plaintext
+> ls /  # directory name = /mydata
+```
+
+Let's create a file in that new filesystem.
+
+```plaintext
+> echo “Is it still here ?” > /mydata/file1
+```
+
+Then let's restart the pod:
+
+```plaintext
+oc delete pod cargo-app-nodesto-…
+```
+
+From the Web Console terminal, check the filesystem of the new instance of the pod to ensure it was persisted
+
+```plaintext
+> ls /mydata
+> cat /mydata/file1
 ```
 
 TODO : 
 
-*   RWO vs RWX
 *   ID and permission for volume writing and sharing
