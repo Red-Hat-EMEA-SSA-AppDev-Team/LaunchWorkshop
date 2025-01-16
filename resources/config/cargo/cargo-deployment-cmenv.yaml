@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    alpha.image.policy.openshift.io/resolve-names: '*'
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"cargo-app:latest","namespace":"proa"},"fieldPath":"spec.template.spec.containers[?(@.name==\"cargo-app\")].image","paused":"false"}]'
+  labels:
+    app: cargo-app-cmenv
+  name: cargo-app-cmenv
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: cargo-app-cmenv
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: cargo-app-cmenv
+        deployment: cargo-app-cmenv
+    spec:
+      containers:
+      - image: cargo-app:latest
+        imagePullPolicy: IfNotPresent
+        name: cargo-app-cmenv
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8443
+          protocol: TCP
+        - containerPort: 8778
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        env:
+        - name: SERVER_NAME 
+          valueFrom:
+            configMapKeyRef:
+              name: cargo-cmenv 
+              key: eap.serverName
+        - name: SERVER_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: cargo-cmenv 
+              key: eap.serverVersion        
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
