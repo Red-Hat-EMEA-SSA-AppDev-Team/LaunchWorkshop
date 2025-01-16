@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+ labels:
+   app: cargo-app-monitor
+ name: cargo-app-monitor
+spec:
+ selector:
+   matchLabels:
+     app: cargo-app
+ endpoints:
+ - port: metrics
+   path: /metrics
+   interval: 10s
+   honorLabels: true

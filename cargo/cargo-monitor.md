@@ -1,100 +1,116 @@
+## Monitoring Pods
+
 ### Monitoring pods via the Web Console
 
-Dev perspective
+The Web console offers several ways to help with the monitoring activities
 
-Dev Perspective → Observe
+The Developer perspective in general
 
-Admin perspective → Project → Workload
+It is similar to the Administrator perspective,  Project tab; select a project and go to the Workload tab
 
-Admin perspective → Pod → metrics
+The Developer perspective and its Observe tab
 
-Admin perspective → Observe
+The Administrator perspective and its Observe menu
+
+Any perspective and the Metrics tab inside a selected Pod 
 
 ### Healthchecks
 
-[ocp-healthchecks.md](ocp-healthchecks.md)
+Openshift automatically performs the self-healing of all pods it runs.
 
-#### Using commands inside a pod
+[Introduction to Openshift self healing](ocp-healthchecks.md)
 
-#### Adding healthchecks via the Web Console.
+The healthchecks, that are part of the deployment object, can rely on 3 mechanisms
 
-From the  Developer perspective, in the Topology view, select a pod and go to Actions → Add/Edit Healthchecks
-
-Using container commands to manage pod health
+*   Commands run inside the container
 
 ```plaintext
 containers:
-- name: cargo-container
+- name: cargo-app-health
   ...
   readinessProbe:
- &nbsp;  exec:
-    command:
-     - curl
-     - '-sw'
-     - '%{http_code}'
-     - 'localhost:8080'
-     - '-o'
-     - /dev/null
- &nbsp;  timeoutSeconds: 5
- &nbsp;  periodSeconds: 10
- &nbsp;  successThreshold: 1
- &nbsp;  failureThreshold: 3  
+    exec:
+      command:
+      - curl
+      - '-sw'
+      - '%{http_code}'
+      - 'localhost:8080'
+      - '-o'
+      - /dev/null
+    timeoutSeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3  
 ```
 
-#### Using HTTP calls to manage pod health
+*   HTTP calls, from inside the container (the port does not have to be exposed on the Openshift SDN network)
 
 ```plaintext
 containers:
-  - name: cargo-container
+- name: cargo-app-health
   ...
-    livenessProbe:
-      httpGet:
- &nbsp;&nbsp;     scheme: HTTP
- &nbsp;&nbsp;     path: /
- &nbsp;&nbsp;     port: 8080
- &nbsp;    timeoutSeconds: 5
- &nbsp;    periodSeconds: 10
- &nbsp;    successThreshold: 1
- &nbsp;    failureThreshold: 3  &nbsp;&nbsp;  
+  livenessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /
+      port: 8080
+    timeoutSeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
 ```
 
-Using TCP calls to manage pod health
+*   TCP calls
 
 ```plaintext
 containers:
-- name: cargo-container
-  ..
+- name: cargo-app -health
+  ...
   startupProbe:
     tcpSocket:
- &nbsp;&nbsp;&nbsp;&nbsp; port: 8080
- &nbsp;&nbsp; timeoutSeconds: 3
- &nbsp;&nbsp; periodSeconds: 10
- &nbsp;&nbsp; successThreshold: 1
- &nbsp;&nbsp; failureThreshold: 3
+      port: 8080
+    timeoutSeconds: 3
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
     periodSeconds: 10
 ```
 
-Healthchecks with EAP
+#### Adding healthchecks via the Web Console.
 
-The EAP server provides an health endpoint out of the box (health subsystem)
+Healthchecks can be added from the  Developer perspective.
 
-Go to the Terminal of an EAP-based pod
+In the Topology view, select a pod and go to Actions → Add/Edit Healthchecks
+
+### Healthchecks with EAP
+
+The EAP server provides an HTTP health endpoint out of the box 
+
+Go to the Terminal of an EAP-based pod and type:
 
 ```plaintext
-curl localhost:9990/health 
-curl localhost:9990/health/live 
-curl localhost:9990/health/ready
+> curl localhost:9990/health 
+> curl localhost:9990/health/live 
+> curl localhost:9990/health/ready
 ```
 
-The endpoint is behind the admin port 9990 rather than behind the application port (8080).  It's discourage to expose the Admin endpoint at the service level.  Moreover, EAP also has more complete probes in scripts, that make more checks than the HTTP one and that are recommended to use:
+Therefore, a probe could have been defined as follows:
 
-/opt/eap/bin/livenessProbe.sh
+```plaintext
+  livenessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /health/live
+      port: 9990
+```
 
-/opt/eap/bin/readinessProbe.sh
+But the EAP server image also embeds more complete probes in local scripts, which are recommended to use:
+
+For example:
 
 ```plaintext
 containers:
-- name: cargo-container
+- name: cargo-app-health-cmd
   ...
   readinessProbe:
     exec:
@@ -120,22 +136,46 @@ containers:
     failureThreshold: 3  
 ```
 
-Enhancing healthchecks
+#### Enhancing healthchecks
 
-The healthchecks we saw above mainly checks the runtime.  The application can be checked as well, fo example with he HTTP probe.
+The healthchecks we saw above are provided by the application runtime thus mainly checks this runtime.  
 
-But a developer can add more information to the HTTP healthchecks programmatically, using the microprofile-health-smallrye library (which is shipped with the EAP XP version)
+A developer can decide to add more information to the HTTP healthchecks programmatically, using the “microprofile-health-smallrye” library, which is part of the EAP XP version of the product.
 
-### Metrics monitoring
+### Metrics
 
-The EAP server provides a prometheus-compatible metrics endpoint out of the box (metrics subsystem)
+The EAP server provides a prometheus-compatible metrics endpoint out of the box.
 
-Go to the Terminal of an EAP-based pod
+Go to the Terminal of an EAP-based pod and type:
 
 ```plaintext
 curl localhost:9990/metrics
 ```
 
-The Prometheus and Grafana based dashboards shipped with Openshift can be used to display those metrics.  To enable the scraping of metrics by Prometheus, we need to add the Scraping configuration inside the application namespace.  It can be represented either by a PodMonitor, that will observe a Pod, or a ServiceMonitor, that will find the pods from the Service object.
+The Prometheus and Grafana based dashboards shipped with Openshift, or another similar solution, can be used to display those metrics.  
 
-#### ServiceMonitor
+[Introduction to Openshift metrics](../ocp/ocp-metrics.md)
+
+To enable the scraping of metrics by Prometheus, we need to add an object that can provide the scraping configuration specific to the application to Prometheus.  
+
+This object is a ServiceMonitor, located in the same Namespace as the application.
+
+```plaintext
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+ labels:
+   app: cargo-app-monitor
+ name: cargo-app-monitor
+spec:
+ selector:
+   matchLabels:
+     app: cargo-app
+ endpoints:
+ - port: 9990-tcp
+   path: /metrics
+   interval: 10s
+   honorLabels: true
+```
+
+As we saw it, the EAP metrics are hidden behind an admin port: 9990.  Contrary to the healthchecks, Prometheus does not scrap information directly within the pod, but remotely uses the Openshift SDN network to access the pod's metrics on its HTTP interface.  Therefore, the admin port 9990 must be exposed at the Service level.

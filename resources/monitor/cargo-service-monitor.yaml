@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: cargo-app-monitor
+  name: cargo-app-monitor
+spec:
+  internalTrafficPolicy: Cluster
+  ports:
+  - name: 8080-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: 8443-tcp
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+  - name: 8778-tcp
+    port: 8778
+    protocol: TCP
+    targetPort: 8778
+  - name: 9990-tcp
+    port: 9990
+    protocol: TCP
+    targetPort: 9990
+  selector:
+    app: cargo-app
+    deployment: cargo-app
+  type: ClusterIP
