@@ -20,6 +20,10 @@ ID and permission for volume writing and sharing
 
 *   cargo-config
 
+Centralized logging
+
+*   cargo-troubleshoot
+
 If you use an external registry
 
 *   cargo-build

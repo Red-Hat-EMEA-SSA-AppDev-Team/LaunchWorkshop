@@ -5,15 +5,15 @@ metadata:
     alpha.image.policy.openshift.io/resolve-names: '*'
     image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"cargo-app:latest","namespace":"proa"},"fieldPath":"spec.template.spec.containers[?(@.name==\"cargo-app\")].image","paused":"false"}]'
   labels:
-    app: cargo-app-nodesto
-  name: cargo-app-nodesto
+    app: cargo-app-pvc
+  name: cargo-app-pvc
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: cargo-app-nodesto
+      app: cargo-app-pvc
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -22,13 +22,13 @@ spec:
   template:
     metadata:
       labels:
-        app: cargo-app-nodesto
-        deployment: cargo-app-nodesto
+        app: cargo-app-pvc
+        deployment: cargo-app-pvc
     spec:
       containers:
       - image: cargo-app:latest
         imagePullPolicy: IfNotPresent
-        name: cargo-app-nodesto
+        name: cargo-app-pvc
         ports:
         - containerPort: 8080
           protocol: TCP

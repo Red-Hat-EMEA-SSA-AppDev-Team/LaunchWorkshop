@@ -48,7 +48,7 @@ You can check the prsenc of the environment variable in the Deployment object.
 You can also check its prsenc inside the pod by entering the pod terminal and typing:
 
 ```plaintext
-> env | grep CUSTOM
+&gt; env | grep CUSTOM
 ```
 
 TODO 
@@ -223,7 +223,7 @@ Again, the Deployment object, responsible for configuring the pod at the moment 
 ```plaintext
 spec:
   containers:
-  - name: cargo-app-nodesto
+  - name: cargo-app-pvc
     image: cargo-app:latest
     volumeMounts:
     - mountPath: /mydata
@@ -252,32 +252,32 @@ oc apply -f resources/config/cargo/cargo-claim.yaml
 ```
 
 ```plaintext
-oc apply -f resources/config/cargo/cargo-deployment-nodesto.yaml
+oc apply -f resources/config/cargo/cargo-deployment-pvc.yaml
 ```
 
 You can check that the pod has been created with an additional filesystem directory by going to the pod terminal
 
 ```plaintext
-> ls /  # directory name = /mydata
+&gt; ls /  # directory name = /mydata
 ```
 
 Let's create a file in that new filesystem.
 
 ```plaintext
-> echo “Is it still here ?” > /mydata/file1
+&gt; echo “Is it still here ?” > /mydata/file1
 ```
 
 Then let's restart the pod:
 
 ```plaintext
-oc delete pod cargo-app-nodesto-…
+oc delete pod cargo-app-pvc-…
 ```
 
 From the Web Console terminal, check the filesystem of the new instance of the pod to ensure it was persisted
 
 ```plaintext
-> ls /mydata
-> cat /mydata/file1
+&gt; ls /mydata
+&gt; cat /mydata/file1
 ```
 
 TODO : 
