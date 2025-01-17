@@ -17,7 +17,7 @@ Openshift
 Choices
 
 *   Using the internal or an external registry ?
-*   Using Prometheus user workload, and it is installed ?
+*   Using existing Prometheus User Workload monitoring, and it is installed ?
 *   Using Loki (requires Minio), or an external solution ?
 *   Using Tempo (requires Minio), or an external solution ?
 *   Storage class allowing the on-demand creation of RWO PV ?
