@@ -161,9 +161,9 @@ cp resources/deploy/cargo/cargo-route-helm.yaml cargo-from-helm/templates/
 Edit values.yaml to set a value for the “app.name” and “app.image” parameters.
 
 ```plaintext
-echo "app:" > cargo-from-helm/values.yaml
-echo "  name: cargo-app-helm" >> cargo-from-helm/values.yaml
-echo "  image: 'cargo-app:latest'" >> cargo-from-helm/values.yaml
+echo "app:" &gt; cargo-from-helm/values.yaml
+echo "  name: cargo-app-helm" &gt;&gt; cargo-from-helm/values.yaml
+echo "  image: 'cargo-app:latest'" &gt;&gt; cargo-from-helm/values.yaml
 ```
 
 ```plaintext
@@ -327,8 +327,6 @@ We can see that, though the esult seems to be the same, things seem to have been
 
 a. Similarly to th EAP Helm Chart and the EAP Template, healthchecks have been automatically configured
 
-[Monitoring the Cargo Tracker application](cargo-monitor.md)
-
 b. Multiple Services have been created
 
     There is a Service for the application, an admin one, and a headless one that does not have any IP
@@ -337,16 +335,16 @@ b. Multiple Services have been created
 oc get services  | grep cargo-app-op
 ```
 
-[Introduction to network traffic and pod networking on Openshift](../ocp/ocp-svcroute.md)
-
 c. The pod is not named wihth a random string but with a fixed name, ending with a 0
 
 ```plaintext
 oc get pods | grep cargo-app | grep Running
 ```
 
-[Introduction to Statefulness on Openshift](ocp/ocp-net.md) 
-
 d. Volumes have been configured
+
+In the “Day 2 Operations” part of the workshop, we'll explore deeper the mechanism of "healthchecks".
+
+Prior to that, let's go to the next chapter where we'll understand better what Volumes are.  The following chapter will talk about State management, which brings more clarity on the headless service and named pod created above.
 
 [Managing application data and application configuration](cargo-config.md)

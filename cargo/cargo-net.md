@@ -1,5 +1,1 @@
-### StatefulSets
-
 ### NetworkPolicies
-
-### NodePort

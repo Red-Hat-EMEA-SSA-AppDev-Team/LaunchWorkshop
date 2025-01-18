@@ -1,5 +1,13 @@
-### StatefulSets
+### State management
 
-### NetworkPolicies
+StatefulSets
 
-### NodePort
+Headless services
+
+### Cross-project traffic
+
+NetworkPolicies
+
+### Non HTTP Services
+
+NodePort

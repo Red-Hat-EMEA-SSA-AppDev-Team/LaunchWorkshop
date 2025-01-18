@@ -82,16 +82,16 @@ Healthchecks can be added from the  Developer perspective.
 
 In the Topology view, select a pod and go to Actions → Add/Edit Healthchecks
 
-### Healthchecks with EAP
+#### Healthchecks with EAP
 
 The EAP server provides an HTTP health endpoint out of the box 
 
 Go to the Terminal of an EAP-based pod and type:
 
 ```plaintext
-> curl localhost:9990/health 
-> curl localhost:9990/health/live 
-> curl localhost:9990/health/ready
+&gt; curl localhost:9990/health 
+&gt; curl localhost:9990/health/live 
+&gt; curl localhost:9990/health/ready
 ```
 
 Therefore, a probe could have been defined as follows:
@@ -165,17 +165,17 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
  labels:
-   app: cargo-app-monitor
+ &nbsp;&nbsp;app: cargo-app-monitor
  name: cargo-app-monitor
 spec:
  selector:
-   matchLabels:
-     app: cargo-app
+ &nbsp;&nbsp;matchLabels:
+ &nbsp;&nbsp;&nbsp;&nbsp;app: cargo-app
  endpoints:
  - port: 9990-tcp
-   path: /metrics
-   interval: 10s
-   honorLabels: true
+ &nbsp;&nbsp;path: /metrics
+ &nbsp;&nbsp;interval: 10s
+ &nbsp;&nbsp;honorLabels: true
 ```
 
 As we saw it, the EAP metrics are hidden behind an admin port: 9990.  Contrary to the healthchecks, Prometheus does not scrap information directly within the pod, but remotely uses the Openshift SDN network to access the pod's metrics on its HTTP interface.  Therefore, the admin port 9990 must be exposed at the Service level.
@@ -183,3 +183,64 @@ As we saw it, the EAP metrics are hidden behind an admin port: 9990.  Contrary 
 #### Metrics and the EAP Operator
 
 We saw earlier in the chapter about deploying applications that the EAP Operator already exposed h port 9990.  The intelligence of the Operator is not limited to the deep understanding of the runtime.  It also takes the context the application is in into account.  For example, create another EAP server using the Operator now that the Prometheus User Wokload Monitoring is enabled.  You'll see that the Operator takes that new infomation into account and automatically creates the ServiceMonitor object.
+
+### Capacity management
+
+[Introduction to Openshift Requests and Limits](../ocp/ocp-resources.md)
+
+On the Web Console, in the Metrics tab of one of the Cargo Tracker pod, we can see that the application uses slighlty over 1G of memory.
+
+If you go to the very beginning of the log of those pods, you'll see the Java parameters set by the provided image:
+
+```plaintext
+JAVA_OPTS: … -Xms1303m -Xmx1303m …
+```
+
+This means that the Pod Memory request should be of 1.5GB, and in our case the memory limit should be approximately the same.  
+
+It's a best practice to disable the ability to schedule pods that don't have defined resources requests and limits in production clusters.
+
+\<add how to config>
+
+The Dashboards available from the Observe tab of the Administrator pespective of the Web Console will allow you to do the capacity management of the cluster.
+
+```plaintext
+Select the "Kubernetes / Compute Resources / Cluster" dashboard
+```
+
+Eventually you can also assign quotas to some Openshift projects.
+
+Let's see how request and limits affect the applications.
+
+Requests and Limits can be altered in the yaml representation of the Deployment, from the Web Console, both within the Developer and Administrator perspective, in the “Actions” list of the Deployment object, and on the command line.
+
+```plaintext
+oc appy -f resources/monitor/cargo/cargo-deployment-resource.yaml
+```
+
+The application has been created with a memory of 512MB and 50 millicores of CPU.  Look at the pod logs and watch that the application takes a long time to start, due to the lack of CPU assigned to it:
+
+```plaintext
+oc get logs
+oc logs <pod-name>
+```
+
+At the top of the logs, you'll see that the underlying image reacted to the presence of the Request and Limits:
+
+```plaintext
+JAVA_OPTS: ... -Xms128m -Xmx512m...
+```
+
+Let's give more CPU to the application to help it start:
+
+```plaintext
+oc set resources deployment/cargo-app-resource --limits=cpu=500m --requests=cpu=500m
+```
+
+What if the application was too CPU-consuming ?
+
+```plaintext
+oc set resources deployment/cargo-app-resource --limits=cpu=20 --requests=cpu=20
+```
+
+Openshift won't schedule the pod on any node and will display “Insufficient cpu”.

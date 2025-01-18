@@ -1,0 +1,31 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: cargo-app-state-headless
+  labels:
+    app.kubernetes.io/name: cargo-app-state
+    app.openshift.io/runtime: eap
+    wildfly.org/operated-by-headless: active
+spec:
+  clusterIP: None
+  ipFamilies:
+    - IPv4
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+    - name: admin
+      protocol: TCP
+      port: 9990
+      targetPort: 9990
+  internalTrafficPolicy: Cluster
+  clusterIPs:
+    - None
+  type: ClusterIP
+  ipFamilyPolicy: SingleStack
+  sessionAffinity: None
+  selector:
+    app.kubernetes.io/name: cargo-app-state
+    app.openshift.io/runtime: eap
+    wildfly.org/operated-by-headless: active

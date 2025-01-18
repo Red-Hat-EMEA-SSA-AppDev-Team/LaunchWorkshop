@@ -14,6 +14,10 @@ Openshift
 *   Generic user with registry-editor right
 *   EAP Operator installed
 
+Us
+
+*   An open environment with MTA installed
+
 Choices
 
 *   Using the internal or an external registry ?

@@ -48,7 +48,7 @@ You can check the prsenc of the environment variable in the Deployment object.
 You can also check its prsenc inside the pod by entering the pod terminal and typing:
 
 ```plaintext
-&gt; env | grep CUSTOM
+~ env | grep CUSTOM
 ```
 
 TODO 
@@ -258,13 +258,13 @@ oc apply -f resources/config/cargo/cargo-deployment-pvc.yaml
 You can check that the pod has been created with an additional filesystem directory by going to the pod terminal
 
 ```plaintext
-&gt; ls /  # directory name = /mydata
+~ ls /  # directory name = /mydata
 ```
 
 Let's create a file in that new filesystem.
 
 ```plaintext
-&gt; echo “Is it still here ?” > /mydata/file1
+~ echo “Is it still here ?” &gt; /mydata/file1
 ```
 
 Then let's restart the pod:
@@ -276,10 +276,14 @@ oc delete pod cargo-app-pvc-…
 From the Web Console terminal, check the filesystem of the new instance of the pod to ensure it was persisted
 
 ```plaintext
-&gt; ls /mydata
-&gt; cat /mydata/file1
+~ ls /mydata
+~ cat /mydata/file1
 ```
 
 TODO : 
 
 *   ID and permission for volume writing and sharing
+
+To close this part of th workshop, let's now go back to headless services and named pod with the next chapter
+
+[Stateful applications on Openshift](cargo-net.md)

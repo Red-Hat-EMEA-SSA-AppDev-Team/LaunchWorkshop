@@ -4,7 +4,7 @@ This workshop's section will demonstrate how to take an existing Java EE7 legacy
 
 [Introduction to application modernization: building and deploying containerized applications to Openshift](../ocp/ocp-builddeploy.md)
 
-### Build and deployment
+### Day 0 : Build and deployment
 
 [Building the Cargo Tracker EAP application with S2I and Docker](cargo-build.md)
 
@@ -12,9 +12,9 @@ This workshop's section will demonstrate how to take an existing Java EE7 legacy
 
 [Working with external databases](cargo-db.md)
 
-### Application Lifecycle Automation
+### Day 1 : Lifecycle Automation
 
-### Day 2 operations
+### Day 2 : Managing applications
 
 [Managing resources for the Cargo Tracker application](cargo-config.md)
 
