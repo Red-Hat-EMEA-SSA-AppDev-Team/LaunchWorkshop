@@ -161,9 +161,9 @@ cp resources/deploy/cargo/cargo-route-helm.yaml cargo-from-helm/templates/
 Edit values.yaml to set a value for the “app.name” and “app.image” parameters.
 
 ```plaintext
-echo "app:" &gt; cargo-from-helm/values.yaml
-echo "  name: cargo-app-helm" &gt;&gt; cargo-from-helm/values.yaml
-echo "  image: 'cargo-app:latest'" &gt;&gt; cargo-from-helm/values.yaml
+echo "app:" > cargo-from-helm/values.yaml
+echo "  name: cargo-app-helm" >> cargo-from-helm/values.yaml
+echo "  image: 'cargo-app:latest'" >> cargo-from-helm/values.yaml
 ```
 
 ```plaintext
@@ -288,7 +288,7 @@ In the particular case of EAP, Openshift comes with an associated Operator.
 From the Administrator perspective of the Web Console:
 
 ```plaintext
-Go to the Operators tab on th left
+Go to the Operators tab on the left
 Select "Installed Operators"
 Select "Jboss EAP"
 Go to the WildflyServer tab

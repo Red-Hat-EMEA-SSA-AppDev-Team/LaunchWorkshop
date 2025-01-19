@@ -18,11 +18,9 @@ Vx scope
 
 Backlog v0
 
-*   Limits and requests
 *   Centralized logging (Loki)
 *   MTA
-*   Cargo with exernal database
-    *   \+ Secrets and ServiceBindings
+*   Cargo with exernal database :: Secrets and ServiceBindings
 *   Jenkins, Tekton and GitOps
     *   Pipeline best practices  → Optimization workshop ?
         *   exernal registry (multi-cluster)
@@ -38,10 +36,19 @@ Backlog v0
     *   \-Dwildfly.statistics-enabled=true
 *   \<doc JBoss EAP XP>
 *   Add explanation about Image stream security (lookupStrategy)
+*   Add “Best practices for Platform Engineers" in cargo-db.md
 *   copy to Strangler
 *   ocp/\* documentations
 *   EAP XP
 *   Extras on Developer Console
     *   add pipeline
     *   add jar
+
+Optimization workshop
+
+*   Pod placement
+    *   Database on the same nodes
+    *   Taints and Tolerations for GPU
 *   Network policy exercice
+*   Multi-staged podman build
+*   TSSC

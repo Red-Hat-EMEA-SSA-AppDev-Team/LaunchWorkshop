@@ -264,7 +264,7 @@ You can check that the pod has been created with an additional filesystem direct
 Let's create a file in that new filesystem.
 
 ```plaintext
-~ echo “Is it still here ?” &gt; /mydata/file1
+~ echo “Is it still here ?” > /mydata/file1
 ```
 
 Then let's restart the pod:

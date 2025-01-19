@@ -29,7 +29,7 @@ oc get template -n openshift eap74-basic-s2i -o yaml
 Having a ook at the parameters dfind at th end of the file, you'll see that you need to set at least the application name and GIT URL
 
 ```plaintext
-oc process eap74-basic-s2i -p SOURCE_REPOSITORY_REF=https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker#jee7-eap7 -p APPLICATION_NAME=cargo-app-eaptmpl | oc apply -f -
+oc process eap74-basic-s2i -p SOURCE_REPOSITORY_REF=https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker#db2 -p APPLICATION_NAME=cargo-app-eaptmpl | oc apply -f -
 ```
 
 As we know, Templates are also accessible from the Developer perspective of the Web Console
@@ -112,7 +112,7 @@ helm upgrade --install cargo-app-helm-s2i -f helm.yaml openshift/redhat-eap74
 Alternatively, they can also be set on the command line
 
 ```plaintext
-helm install cargo-app-helm-s2i openshift/redhat-eap74 --set build.uri=https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker --set build.ref=jee7-eap7
+helm install cargo-app-helm-s2i openshift/redhat-eap74 --set build.uri=https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker --set build.ref=db2
 ```
 
 Looking into the details of the Helm Chart, inside the “templates” directory, we can see that, like the previously used Template, the Helm Chart does not stop at the build process, but also publishes deployment objects such as Deployment and Service.

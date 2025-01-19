@@ -9,7 +9,7 @@ One way is to use the Openshift S2I process.
 #### From the source code
 
 ```plaintext
-oc new-build eap74-openjdk11-openshift-rhel8~https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker#jee7-eap7 --name=cargo-app-source
+oc new-build eap74-openjdk11-openshift-rhel8~https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker#db2 --name=cargo-app-source
 
 oc get builds
 oc get images | grep cargo-app-source
@@ -38,7 +38,7 @@ Sometimes it's prefered to execute the Java/maven build externally
 
 ```plaintext
 oc import-image registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8 --confirm
-oc new-build --binary=true  --image-stream=eap74-openjdk11-openshift-rhel8  --name=cargo-app
+oc new-build --binary=true --image-stream=eap74-openjdk11-openshift-rhel8 --name=cargo-app
 ```
 
 A new BuildConfig object should have been created in the namespace
@@ -52,11 +52,11 @@ Now that the process exists, we can use a .war file to trigger it
 ```plaintext
 git clone https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker
 cd cargotracker
-git checkout jee7-eap7
+git checkout db2
 
 mvn package
 mkdir ocp ; mkdir ocp/deployments/
-mv target/*.war  ocp/deployments/
+mv target/*.war > ocp/deployments/
 
 oc start-build cargo-app --from-dir=./ocp --follow
 ```
@@ -104,7 +104,7 @@ podman images
 We can test it locally to see if the build procss was ok.
 
 ```plaintext
-podman run <imageID>
+podman run <imageid>
 ```
 
 If so, we can push the image to a remote registry.
@@ -169,4 +169,4 @@ Type “eap” in th search box
 
 JBoss EAP XP is a JBoss EAP server with additional Microprofile libraries.
 
-\<doc JBoss EAP XP>
+\<doc jboss="" eap="" xp="">

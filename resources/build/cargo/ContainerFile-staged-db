@@ -1,0 +1,6 @@
+FROM registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8:latest AS EAP_RUNTIME
+COPY ocp/deployments/* /deployments
+
+FROM EAP_RUNTIME
+COPY ocp/standalone-openshift.xml /opt/eap/standalone/configuration/standalone-openshift.xml
+ENTRYPOINT /opt/eap/bin/standalone.sh -c standalone-openshift.xml -bmanagement 0.0.0.0 -Djboss.server.data.dir=/opt/eap/standalone/data -Dwildfly.statistics-enabled=true
