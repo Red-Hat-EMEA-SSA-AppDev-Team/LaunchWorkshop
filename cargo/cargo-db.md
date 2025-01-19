@@ -81,6 +81,8 @@ To verify that this new instance uses the external database, go to the database 
 
 To restore the state of the application, scale the database back to 1 and restart the Cargo Tracker application.
 
+\<Best practices for Platform Engineers>
+
 #### Scaling the Cargo Tracker application
 
 Though the database itself, being a relational database, cannot scale (cf. CAP theorem), now that the database is externalized, the “front-end” part of the Cargo Tracker application can scale horizontally to support an increasing load (as long as the database allows for the number of sessions that are required by the front-end).
@@ -91,4 +93,6 @@ You can make some test with the oc scale command:
 oc scale --replicas=3 deployment/cargo-app-postgres
 ```
 
-\<Best practices for Platform Engineers>
+#### Using Secrets
+
+#### Using SeviceBindings
