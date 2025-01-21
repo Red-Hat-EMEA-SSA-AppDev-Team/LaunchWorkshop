@@ -14,16 +14,15 @@ Several applications can be used: 
 
 From a high level overview, here are the topics covered during the workshop:
 
+*   Modernizing and containerizing traditional applications
 *   Building an existing application
     *   Using S2I source
     *   Using S2I binary
-    *   Using docker/podman
+    *   Using external docker/podman build
     *   Using Helm
     *   Using Templates
 *   Image security and capabilities
-    *   Kubernetes images
-    *   Openshift images
-    *   Red Hat Openshift images
+    *   Kubernetes vs Openshift vs. Red Hat images
 *   Deploying a built application
     *   Using the Web Console
     *   Using Helm
@@ -35,6 +34,8 @@ From a high level overview, here are the topics covered during the workshop:
     *   Configuration files
     *   Using the filesystem
     *   Stateful applications
+    *   Working with databases
+    *   Application traffic on Openshift
 *   Troubleshooting containers
     *   Logs
     *   Debugging

@@ -28,7 +28,9 @@ Then, open a web bowser to http://localhost:8080/cargo-tracker
 
 The Cargo Tracker application also has a slighly modified version that can be run on a JBoss EAP 7.4 server over a java 11 runtime.
 
-The source code is available here, under the jee7-eap7 branch:
+The source code is available here, under the jee7-eap7 branch.  
+
+There is a specific tag pointing to the version of the application using an internal database.
 
 [https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker/tree/jee7-eap7](https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker/tree/jee7-eap7)
 
@@ -37,7 +39,7 @@ The source code is available here, under the jee7-eap7 branch:
 ```plaintext
 git clone https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker
 cd cargotracker
-git checkout jee7-eap7
+git checkout db2
 
 javac -version
 sudo update-alternatives --config javac     # select java 11

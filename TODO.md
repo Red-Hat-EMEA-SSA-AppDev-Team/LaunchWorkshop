@@ -21,6 +21,7 @@ Backlog v0
 *   Centralized logging (Loki)
 *   MTA
 *   Cargo with exernal database :: Secrets and ServiceBindings
+*   Staged builds with Containerfile
 *   Jenkins, Tekton and GitOps
     *   Pipeline best practices  → Optimization workshop ?
         *   exernal registry (multi-cluster)
@@ -34,7 +35,7 @@ Backlog v0
 *   multi-containers pods (init and sidecar)
 *   enhance cargo-build.md
     *   \-Dwildfly.statistics-enabled=true
-*   \<doc JBoss EAP XP>
+*   \<doc jboss="" eap="" xp="">
 *   Add explanation about Image stream security (lookupStrategy)
 *   Add “Best practices for Platform Engineers" in cargo-db.md
 *   copy to Strangler

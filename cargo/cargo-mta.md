@@ -1,0 +1,1 @@
+## Preparing traditional application for the cloud
