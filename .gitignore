@@ -1,0 +1,13 @@
+# Red Hat OpenShift Dev Spaces or Eclipse or IntelliJ IDE or VSCode directories and resources
+/target/
+/.classpath
+/.project
+/.settings
+*.DS_Store
+/.pom.xml.swp
+/bin/
+/.idea
+*.iml
+/.vscode
+/.factorypath
+/.apt_generated_tests/
