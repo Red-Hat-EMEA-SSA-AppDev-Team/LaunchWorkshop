@@ -1,0 +1,42 @@
+apiVersion: tempo.grafana.com/v1alpha1
+kind: TempoStack
+metadata:
+  name: simple
+spec:
+  # Integer value for the number of ingesters that must acknowledge the data from the distributors before accepting a span
+  replicationFactor: 1
+  # Retention period defined by dataset.
+  retention:
+    # global retention. default: value is 48h.
+    global:
+      traces: 120h
+  # StorageSize for PVCs used by ingester. Defaults to 10Gi.
+  storageSize: 10Gi
+  # Spec for the object storage endpoint to store traces.
+  storage: 
+    secret:
+      name: minio-tempo
+      type: s3
+  # The total amount of resources for Tempo instance.
+  resources:
+    total:
+      limits:
+        memory: 10Gi
+        cpu: 2000m
+  # Tenants
+  tenants:
+    mode: openshift
+    # The list of tenants
+    authentication:
+      - tenantName: demo
+        tenantId: "1610b0c3-c509-4592-a256-a1871353dbfa"
+  # Template defines requirements for a set of tempo components.
+  template:
+    # Enables a gateway that performs authentication and authorization checks.
+    gateway:
+      enabled: true
+    # Options specific to the Jaeger Query component
+    queryFrontend:
+      # Enable Jaeger Query frontend
+      jaegerQuery:
+        enabled: true

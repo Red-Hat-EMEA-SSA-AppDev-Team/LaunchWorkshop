@@ -1,0 +1,64 @@
+# ClusterRole and ClusterRoleBinding objects have to be created to enable reading and writing the data.
+## RBAC for reading the data
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tempostack-traces-reader
+rules:
+  - apiGroups:
+      - 'tempo.grafana.com'
+    resources: # Lists the tenants
+      - demo
+    resourceNames:
+      - traces
+    verbs:
+      - 'get' # Enables the read operation.
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tempostack-traces-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tempostack-traces-reader
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: system:authenticated # Grants all authenticated users the read permissions for trace data
+
+## RBAC for writing the data
+## This RBAC gives service account otel-collector write access for trace data for dev tenant.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-collector # The service account name for the client to use when exporting trace data.
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tempostack-traces-write
+rules:
+  - apiGroups:
+      - 'tempo.grafana.com'
+    resources: # Lists the tenants
+      - demo
+    resourceNames:
+      - traces
+    verbs:
+      - 'create' # Enables the write operation.
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tempostack-traces
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tempostack-traces-write
+subjects:
+  - kind: ServiceAccount
+    name: otel-collector
+    namespace: observability

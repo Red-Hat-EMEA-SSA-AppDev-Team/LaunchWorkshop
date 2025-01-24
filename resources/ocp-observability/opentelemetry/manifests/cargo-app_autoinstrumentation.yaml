@@ -1,0 +1,16 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: cargo-app
+spec:
+  env:
+    - name: OTEL_EXPORTER_OTLP_TIMEOUT
+      value: "20"
+  exporter:
+    endpoint: http://otel-collector.observability.svc:4317
+  propagators:
+    - tracecontext
+    - baggage
+  sampler:
+    type: parentbased_traceidratio
+    argument: "0.50"
