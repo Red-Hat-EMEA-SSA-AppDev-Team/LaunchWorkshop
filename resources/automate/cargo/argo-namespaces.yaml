@@ -1,0 +1,35 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+    name: argocd-namespaces-cargo
+objects:
+ - apiVersion: project.openshift.io/v1
+   kind: Project
+   metadata:
+     annotations:
+       openshift.io/description: "cargo development for ${USER}"
+       openshift.io/display-name: cargo development for ${USER}
+       argocd.argoproj.io/sync-wave: "-1"
+     labels:
+       kubernetes.io/metadata.name: cargo-dev-${USER}
+     name: cargo-dev-${USER}
+   spec:
+     finalizers:
+     - kubernetes
+ - apiVersion: project.openshift.io/v1
+   kind: Project
+   metadata:
+     annotations:
+       openshift.io/description: "cargo production for ${USER}"
+       openshift.io/display-name: "cargo production for ${USER}"
+       argocd.argoproj.io/sync-wave: "-1"
+     labels:
+       kubernetes.io/metadata.name: cargo-prod-${USER}
+     name: cargo-prod-${USER}
+   spec:
+     finalizers:
+     - kubernetes     
+parameters:
+- description: Specific User
+  value: 'user1'
+  name: USER

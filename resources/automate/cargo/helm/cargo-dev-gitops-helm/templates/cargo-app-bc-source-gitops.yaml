@@ -1,0 +1,33 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app.kubernetes.io/version: "7.4"
+    app.openshift.io/runtime: eap
+    com.company: Red_Hat
+  name: cargo-app-bc-source-gitops
+spec:
+  failedBuildsHistoryLimit: 5
+  output:
+    to:
+      kind: ImageStreamTag
+      name: cargo-app-gitops:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    git:
+      ref: jee7-eap7
+      uri: https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker
+    type: Git
+  strategy:
+    sourceStrategy:
+      forcePull: true
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8:latest
+      incremental: true
+    type: Source
+  successfulBuildsHistoryLimit: 5
+  triggers:
+  - type: ConfigChange

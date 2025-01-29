@@ -1,0 +1,50 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+    name: argocd-app-cargo-kustomize
+objects:
+ - apiVersion: argoproj.io/v1alpha1
+   kind: Application
+   metadata:
+     labels:
+       app.kubernetes.io/name: cargo-dev-${USER}
+     name: cargo-dev-${USER}
+     namespace: openshift-gitops
+   spec:
+     destination:
+       namespace: cargo-dev-${USER}
+       server: https://kubernetes.default.svc
+     project: default
+     source:
+       path: ${USER}/dev/overlays
+       repoURL: ${GITEA}/${USER}
+     syncPolicy:
+       automated:
+         prune: true
+         selfHeal: true
+ - apiVersion: argoproj.io/v1alpha1
+   kind: Application
+   metadata:
+     labels:
+       app.kubernetes.io/name: cargo-prod-${USER}
+     name: cargo-prod-${USER}
+     namespace: openshift-gitops
+   spec:
+     destination:
+       namespace: cargo-prod-${USER}
+       server: https://kubernetes.default.svc
+     project: default
+     source:
+       path: ${USER}/prod/overlays
+       repoURL: ${GITEA}/${USER}
+     syncPolicy:
+       automated:
+         prune: true
+         selfHeal: true         
+parameters:
+- description: Specific User
+  value: 'user1'
+  name: USER
+- description: Gitea server
+  value: ''
+  name: GITEA 

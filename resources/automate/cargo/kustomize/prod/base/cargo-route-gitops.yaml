@@ -1,0 +1,21 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: cargo-app-gitops
+    app.kubernetes.io/component: cargo-app-gitops
+    app.kubernetes.io/instance: cargo-app-gitops
+    app.kubernetes.io/name: cargo-app-gitops
+    app.kubernetes.io/part-of: cargo-app-gitops
+  name: cargo-app-gitops
+spec:
+  port:
+    targetPort: 8080-tcp
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: cargo-app-gitops
+    weight: 100
+  wildcardPolicy: None

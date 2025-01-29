@@ -1,0 +1,4 @@
+resources:
+- cargo-deployment-gitops.yaml
+- cargo-route-gitops.yaml
+- cargo-service-gitops.yaml

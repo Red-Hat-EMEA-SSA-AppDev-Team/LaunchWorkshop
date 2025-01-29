@@ -16,6 +16,12 @@ This workshop's section will demonstrate how to take an existing Java EE7 legacy
 
 ### Day 1 : Lifecycle Automation
 
+[Automating Builds and deployments with pipelines](cargo-pipelines.md)
+
+[Deploying the GitOps way](cargo-gitops.md)
+
+[Combining Pipelines with GitOps ArgoCD](cargo-fullsdlc.md)
+
 ### Day 2 : Managing applications
 
 [Managing resources for the Cargo Tracker application](cargo-config.md)
@@ -23,3 +29,5 @@ This workshop's section will demonstrate how to take an existing Java EE7 legacy
 [Troubleshooting the Cargo Tracker application](cargo-troubleshoot.md)
 
 [Monitoring the Cargo Tracker application](cargo-monitor.md)
+
+[Introdution to Platform engineering](../ocp/ocp-platformengineering.md)

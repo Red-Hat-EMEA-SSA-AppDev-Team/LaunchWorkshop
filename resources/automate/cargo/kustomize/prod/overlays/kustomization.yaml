@@ -1,0 +1,12 @@
+bases:
+- ../base
+
+patchesJson6902:
+  - target:
+      version: v1
+      kind: Deployment
+      name: cargo-app-gitops
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2

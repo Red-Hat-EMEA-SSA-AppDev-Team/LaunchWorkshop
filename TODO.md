@@ -22,10 +22,9 @@ Backlog v0
 *   MTA
 *   Cargo with exernal database :: Secrets and ServiceBindings
 *   Staged builds with Containerfile
-*   Jenkins, Tekton and GitOps
-    *   Pipeline best practices  → Optimization workshop ?
-        *   exernal registry (multi-cluster)
-        *   image tag
+*   Tekton and GitOps
+*   Jenkins pipelines
+*   External registry
     *   In case of External registry
         *   Adapt cargo-build
         *   Adapt cargo-deploy

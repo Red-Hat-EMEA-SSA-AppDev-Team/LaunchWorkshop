@@ -152,10 +152,6 @@ rm -rf cargo-from-helm/templates/NOTES.txt
 cp resources/deploy/cargo/cargo-deployment-helm.yaml cargo-from-helm/templates/
 cp resources/deploy/cargo/cargo-service-helm.yaml cargo-from-helm/templates/
 cp resources/deploy/cargo/cargo-route-helm.yaml cargo-from-helm/templates/
-
-cp resources/deploy/cargo/cargo-deployment-helm.yaml cargo-from-helm/templates/
-cp resources/deploy/cargo/cargo-service-helm.yaml cargo-from-helm/templates/
-cp resources/deploy/cargo/cargo-route-helm.yaml cargo-from-helm/templates/
 ```
 
 Edit values.yaml to set a value for the “app.name” and “app.image” parameters.

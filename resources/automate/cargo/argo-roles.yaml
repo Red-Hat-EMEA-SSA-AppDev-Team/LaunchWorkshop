@@ -1,0 +1,35 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+    name: argocd-app-roles
+objects:
+ - apiVersion: rbac.authorization.k8s.io/v1
+   kind: RoleBinding
+   metadata:
+     name: argocd-edit
+     namespace: cargo-dev-${USER}
+   roleRef:
+     apiGroup: rbac.authorization.k8s.io
+     kind: ClusterRole
+     name: edit
+   subjects:
+   - kind: ServiceAccount
+     name: openshift-gitops-argocd-application-controller
+     namespace: openshift-gitops
+ - apiVersion: rbac.authorization.k8s.io/v1
+   kind: RoleBinding
+   metadata:
+     name: argocd-edit
+     namespace: cargo-prod-${USER}
+   roleRef:
+     apiGroup: rbac.authorization.k8s.io
+     kind: ClusterRole
+     name: edit
+   subjects:
+   - kind: ServiceAccount
+     name: openshift-gitops-argocd-application-controller
+     namespace: openshift-gitops     
+parameters:
+- description: Specific User
+  value: 'user1'
+  name: USER     

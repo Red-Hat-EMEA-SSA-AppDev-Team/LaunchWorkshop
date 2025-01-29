@@ -1,0 +1,7 @@
+resources:
+- eap7-is.yaml
+- cargo-is-source-gitops.yaml
+- cargo-app-bc-source-gitops.yaml
+- cargo-deployment-gitops.yaml
+- cargo-route-gitops.yaml
+- cargo-service-gitops.yaml
