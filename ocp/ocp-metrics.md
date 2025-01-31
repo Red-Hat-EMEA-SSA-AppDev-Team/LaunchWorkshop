@@ -12,7 +12,7 @@ Of course you're free to use any other Observability tools, running on or outsid
 
 As a user with cluster-admin privileges:
 
-1. Create the cluster-monitoring-config configMap in the openshift-monitoring namespace:
+1. Create the `cluster-monitoring-config` configMap in the `openshift-monitoring` namespace:
     ```shell
     oc -n openshift-monitoring apply -f - <<EOF
     apiVersion: v1
@@ -48,7 +48,7 @@ As a user with cluster-admin privileges:
     EOF
     ```
 
-2. Verify the activation of the user-defined project monitoring. Check that the prometheus-operator, prometheus-user-workload and thanos-ruler-user-workload pods are running in the openshift-user-workload-monitoring project
+2. Verify the activation of the user-defined project monitoring. Check that the `prometheus-operator`, `prometheus-user-workload` and `thanos-ruler-user-workload` pods are running in the `openshift-user-workload-monitoring` namespace:
     ```shell
     oc get pods -n  openshift-user-workload-monitoring
     ```

@@ -226,7 +226,7 @@ The Prometheus and Grafana based dashboards shipped with Openshift, or another s
 
 To enable the scraping of metrics by Prometheus, we need to add an object that can provide the scraping configuration specific to the application to the OpenShift user-defined projects Prometheus.  
 
-This object is a ServiceMonitor, located in the same Namespace as the application.
+This object is a `ServiceMonitor`, located in the same namespace as the application.
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1
@@ -250,7 +250,7 @@ As we saw it, the EAP metrics are hidden behind an admin port: 9990.  Contrary 
 
 ##### Visualize metrics using the OpenShift console
 
-The OpenShift web console provides a metrics panel via the _Administrator/Developer perspective -> Observe -> Metrics_ menu.
+The OpenShift web console provides a metrics panel via the _Administrator or Developer perspective -> Observe -> Metrics_ menu.
 
 For instance, you can query for the `cargo-app` number of active sessions (`jboss_undertow_active_sessions`) and total sessions created (`jboss_undertow_sessions_created_total`) by using the following promQL queries:
 - Number of active sessions: `jboss_undertow_active_sessions{pod =~ "cargo-app-.*"}`
@@ -266,16 +266,16 @@ You should be able to observe the metrics with a view similar to the following:
 
 ##### Metrics and the EAP Operator
 
-We saw earlier in the chapter about deploying applications that the EAP Operator already exposed the port 9990.  The intelligence of the Operator is not limited to the deep understanding of the runtime.  It also takes the context the application is in into account.  For example, create another EAP server using the Operator now that the Prometheus User Wokload Monitoring is enabled.  You'll see that the Operator takes that new infomation into account and automatically creates the ServiceMonitor object.
+We saw earlier in the chapter about deploying applications that the EAP Operator already exposed the port 9990.  The intelligence of the Operator is not limited to the deep understanding of the runtime.  It also takes the context the application is in into account.  For example, create another EAP server using the Operator now that the Prometheus User Wokload Monitoring is enabled.  You'll see that the Operator takes that new infomation into account and automatically creates a `ServiceMonitor` object.
 
-### Aggregated logging
+### Centralized logging
 
 [Introduction to Openshift Logging](../ocp/ocp-logging.md)
 > TODO
 
-You can visualize the aggregated logs in the OpenShift web console via the _Administrator/Developer perspective -> Observe -> Logs_ menu.
+You can visualize the aggregated logs in the OpenShift web console via the _Administrator or Developer perspective -> Observe -> Logs_ menu.
 
-For instance, in the Administrator perspective, you may query for all the application logs of the cargo-app in the eap7 namespace by using the `namespaces` and `containers` filters as shown in the screenshot below:
+For instance, via the _Administrator perspective_, you may query for all the application logs of the cargo-app in the `eap7` namespace by using the `namespaces` and `containers` filters as shown in the screenshot below:
 
 ![cargo-app aggregated logs](../_doc-images/cargo-app_aggregated-logs.png)
 
@@ -295,8 +295,11 @@ The installed TempoStack instance is enabled for multi-tenancy. For the workshop
 
 #### Traces visualization using the Cluster Observability Operator distributed tracing UI plugin
 
-It is recommended to use the [Distributed Tracing UI Plugin](https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/cluster_observability_operator/observability-ui-plugins#distributed-tracing-ui-plugin) of the [Cluster Observability Operator](https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/cluster_observability_operator/index) to visualize collected applications traces. The  tracing UI is available in the Administrator perspective at _Administrator perspective -> Observe -> Traces_
+As the Jaeger UI is deprecated, it is recommended to use the [Distributed Tracing UI Plugin](https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/cluster_observability_operator/observability-ui-plugins#distributed-tracing-ui-plugin) of the [Cluster Observability Operator](https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/cluster_observability_operator/index) to visualize the collected application traces. The  Tracing UI is available in the _Administrator perspective_ at _Observe -> Traces_.
 
-For instance, you can filter traces for the cargo-app UI access with a duration superior to 10ms by using this traceQL query: `{resource.service.name =~ "cargo-app.*" && name =~ "/cargo-tracker.*" && duration > 10ms}`
+For instance, you can filter traces for the cargo-app UI access with a `duration` superior to `10 ms` by using the following traceQL query:
+```shell
+{resource.service.name =~ "cargo-app.*" && name =~ "/cargo-tracker.*" && duration > 10ms}
+```
 
 ![cargo-app distributed tracing with Jaeger UI](../_doc-images/cargo-app_distributed-tracing.png)
