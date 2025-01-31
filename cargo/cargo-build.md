@@ -6,6 +6,10 @@ One way is to use the Openshift S2I process.
 
 ### Openshift S2I
 
+The Openshift Build process is based on an Object called a BuildConfig.
+
+This can be created from the command line with nthe “oc new-build” command, or graphically from the Web Console, under the 'Build' menu of both the Administrator and Developer perspective.
+
 #### From the source code
 
 ```plaintext
@@ -56,7 +60,7 @@ git checkout db2
 
 mvn package
 mkdir ocp ; mkdir ocp/deployments/
-mv target/*.war > ocp/deployments/
+mv target/*.war &gt; ocp/deployments/
 
 oc start-build cargo-app --from-dir=./ocp --follow
 ```
