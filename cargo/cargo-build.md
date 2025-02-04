@@ -88,15 +88,16 @@ Fo podman, we can use the following ContainerFile
 
 ```plaintext
 FROM registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8:latest
-COPY ocp/deployments/* /deployments
-ENTRYPOINT /opt/eap/bin/standalone.sh -c standalone-openshift.xml -bmanagement 0.0.0.0 -Djboss.server.data.dir=/opt/eap/standalone/data -Dwildfly.statistics-enabled=true
+COPY *.war $JBOSS_HOME/standalone/deployments/
 ```
 
 \---
 
+From the source code directory:
+
 ```plaintext
 podman login registry.redhat.io
-podman build . -t cargo-app-podman
+podman build . -t cargo-app-podman -f $/resources/build/cargo/Containerfile
 ```
 
 The image should be built locally.
@@ -113,7 +114,7 @@ podman run <imageid>
 
 If so, we can push the image to a remote registry.
 
-In th case of the internal registry of the Openshift cluster, we need to first make sure the rgistry is exposed
+In th case of the internal registry of the Openshift cluster, we need to first make sure the registry is exposed
 
 ```plaintext
 oc get pods -n openshift-image-registry
@@ -152,11 +153,32 @@ oc get is
 
 You can deploy and test the application using the same technique as before.
 
-TODO
+#### Chained builds
 
-→ try to get metrics
+The registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8 is a builder image and, as such, contains building tools (such as the ‘assemble’ script) that are not recommended to be present on a production image as it increases the surface of attack.
 
-\-Dwildfly.statistics-enabled=true
+When performing external docker builds, it's recommended to perform a "chained build" to:
+
+*   first, build an EAP server using the builder image
+*   then, copy the built artifacts from the first image to a minimalist runtime image
+
+Here is an example of such a dockerfile:
+
+```plaintext
+FROM registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8 AS builder
+COPY *.war $JBOSS_HOME/standalone/deployments/
+
+FROM registry.redhat.io/jboss-eap-7/eap74-openjdk11-runtime-openshift-rhel8 AS runtime
+COPY --from=builder --chown=jboss:root $JBOSS_HOME $JBOSS_HOME
+```
+
+To execute this build:
+
+```plaintext
+podman build . -t cargo-app-podman-chained -f $/resources/build/cargo/Containerfile-chained
+podman tag localhost/cargo-app-podman-chained:latest default-route-openshift-image-registry.apps.<domain>/<namespace>/cargo-app-podman-chained:latest
+podman push default-route-openshift-image-registry.apps.<domain>/<namespace>/cargo-app-podman-chained:latest
+```
 
 ### Using BuilderImage directly
 

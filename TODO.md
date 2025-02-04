@@ -1,33 +1,17 @@
 v0 scope
 
-*   Cargo application
+*   JEE7 monolith legacy application
 *   MTA
 *   GitOps and Tekton
-*   EAP8
-
-V1 scope
-
-*   Jenkins ?  Other ?
-*   Microservices migration
-*   .NET app (And OCP Virt ?)
-*   Improved Spring monolith (PetClinic ?)
-
-Vx scope
-
-*   Quarkus
-*   Python, Node
-*   Cloud services (database)
-*   Operator-driven database
+*   Migrattion :: EAP8
 
 Backlog v0
 
 *   Centralized logging (Loki)
 *   MTA
+*   Instructions EAP7 and EAP8
+*   \-------
 *   Tekton
-*   \-------
-*   Staged builds with Containerfile
-*   Network policy exercice
-*   \-------
 *   Use of the JEE 7 glassfish app on OCP
     *   SCC security on Openshift
     *   ID and permission for volume writing and sharing (fsgroup…)  --cargo-config.md
@@ -37,8 +21,6 @@ Backlog v0
     *   In case of External registry
         *   Adapt cargo-build
         *   Adapt cargo-deploy
-*   enhance cargo-build.md
-    *   \-Dwildfly.statistics-enabled=true
 *   \<doc jboss="" eap="" xp="">
 *   Add explanation about Image stream security (lookupStrategy)
 *   Add “Best practices for Platform Engineers" in cargo-db.md
@@ -49,14 +31,36 @@ Backlog v0
 *   EAP XP
 *   ocp/\* documentations
 *   copy to Strangler
-*   Jenkins
+
+\-----------------------------------------------------------------------------------------------------
+
+Vx backlog
+
+*   Network policy exercice
+*   Jenkins + Other CI/CD ?
+*   Migration:: Microservices
+    *   Prereq: Externalization of activeMQ
+*   .NET app (And OCP Virt ?)
+*   Improved Spring monolith (PetClinic ?)
+*   Quarkus
+*   Python, Node
+*   Cloud services (database)
+*   Operator-driven database
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
 FollowUp workshop
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
 *   DevOps organization
 *   GitOps best practice
 
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
 Optimization workshop
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
 *   Pod placement
     *   Database on the same nodes
