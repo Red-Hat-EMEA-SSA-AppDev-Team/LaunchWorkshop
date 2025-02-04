@@ -1,17 +1,54 @@
+# Migration from Glassfish Payara to JBoss EAP 7
+
 The Cargo Tracker application is stored in the following GIT repository:
 
 https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker/
 
-The  “javaee7” branch contains the original JEE7 application, prepared to run on a Glassfish server ove a Java8 runtime.
+The  “javaee7” branch contains the original JEE7 application, prepared to run on a Glassfish server over a Java 8 runtime.
 
-The jee7-eap7 branch contains a slightly modified version of the application, that can run on a Jboss EAP 7.4 server over a java 11 runtime.
+The jee7-eap7 branch contains a slightly modified version of the application, that can run on a Jboss EAP 7.4 server over a Java 11 runtime.
 
 Here is the list of the changes perfomed to achieve this migration:
 
-*   pom.xml java compilation 11
-*   Ephemeral DB changed from Derby to H2: src/main/webapp/WEB-INF/web.xml 
+## Java upgrated to version 11
+
+Just `pom.xml` configuration:
+
+```xml
+<maven.compiler.source>11</maven.compiler.source>
+<maven.compiler.target>11</maven.compiler.target>
+```
+
+## Ephemeral DB changed from Derby to H2
+
+Reference in `web.xml`:
+
+```xml
+<data-source>
+    <name>java:app/jdbc/CargoTrackerDatabase</name>
+    <class-name>org.h2.jdbcx.JdbcDataSource</class-name>
+    <url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1</url>
+    <user>sa</user>
+    <password>sa</password>
+    <max-pool-size>32</max-pool-size>
+    <min-pool-size>2</min-pool-size>
+</data-source>
+```
+
 *   H2 runtime dependency declared via src/main/webapp/WEB-INF/jboss-deployment-structure.xml
-*   JMS resource adapter dependency removed (useless in JBoss context) \<resource-adapter>jmsra\</resource-adapter> for web.xml
+
+## Removing JMS adapter
+
+The <resource-adapter> element links the JMS destination (queue or topic) to a specific Resource Adapter implementation. This allows the application server to know which adapter to use when managing connections and resources for that destination.
+
+When the application server has only one implementation available, it's possible to remove it and avoid static reference to a specific resource adapter which is not available in all application server implementation.
+
+Removed:
+
+```xml
+<resource-adapter>jmsra\</resource-adapter>
+```
+
 *   JAX-RS Configuration classes: removed
 *   Removal of annotation: orphanRemoval = true - it caused javax.persistence.PersistenceException: org.hibernate.HibernateException: Don't change the reference to a collection with delete-orphan enabled
     *   Code would require a redesign, but it’s not in the current scope.
