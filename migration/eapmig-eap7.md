@@ -8,7 +8,10 @@ The  “javaee7” branch contains the original JEE7 application, prepared to r
 
 The jee7-eap7 branch contains a slightly modified version of the application, that can run on a Jboss EAP 7.4 server over a Java 11 runtime.
 
-Here is the list of the changes perfomed to achieve this migration:
+JBoss EAP v7.4 support Jakarta EE v8, however Jakarta EE 8 remains backwards compatible with other Jakarta EE versions as well.
+In few words, it is still possible to deploy Java EE v7 application.
+
+Here is the list of the changes perfomed to achieve this migration.
 
 ## Java upgrated to version 11
 
@@ -46,17 +49,44 @@ When the application server has only one implementation available, it's possible
 Removed:
 
 ```xml
-<resource-adapter>jmsra\</resource-adapter>
+<resource-adapter>jmsra</resource-adapter>
 ```
 
-*   JAX-RS Configuration classes: removed
-*   Removal of annotation: orphanRemoval = true - it caused javax.persistence.PersistenceException: org.hibernate.HibernateException: Don't change the reference to a collection with delete-orphan enabled
-    *   Code would require a redesign, but it’s not in the current scope.
-*   Enabling lazy loading out of transactional session: src/main/resources/META-INF/persistence.xml
-*   Payara maven configuration was updated: it can run on the same code base and jdk 11
+## MOXy Removal
+
+MOXy: MOXy is EclipseLink's JAXB implementation, which also provides JSON binding capabilities. It was commonly used in Java EE 7 for JSON processing.
+
+JSON-B: JSON-B (Java API for JSON Binding) was introduced in Java EE 8 and is part of Jakarta EE 8. It provides a standardized way to convert Java objects to JSON and vice versa.
+
+For such reason, it's safe to remove the class JsonMoxyConfigurationContextResolver and his references.
+The class RestConfiguration now extends javax.ws.rs.core.Application and the constructor can be deleted.
+
+## Persistence layer change
+
+At runtime, the application server has raised the following exception: `javax.persistence.PersistenceException: org.hibernate.HibernateException: Don't change the reference to a collection with delete-orphan enabled`
+
+JBoss EAP persistence layer (Hibernate) is more strict on this side a simple workaround is to relax the constraint in the class: `org.eclipse.cargotracker.domain.model.cargo.Itinerary` deleting `orphanRemoval = true` from the following annotation:
+
+```java
+@OneToMany(cascade = CascadeType.ALL)
+```
+
+Another runtime issue 
+Enabling lazy loading out of transactional session: src/main/resources/META-INF/persistence.xml
+```xml
+<property name="hibernate.enable_lazy_load_no_trans" value="true"/>
+```
+
+## DataSource
+
+Configuration to run on PostgreSQL.
+
 *   Adding Mapping internal datasource reference to global configured at EAP level
     *   Configure in EAP a datasource with the following jndi: java:/jdbc/CargoTrackerDatabase
     *   If you remove the configuration file: src/main/webapp/WEB-INF/jboss-web.xml  
         EAP will use the default in memory DB
-*   Podman kube play provided to run postgres in a container.
 *   Updated the DB initialization strategy to drop before creating tables
+
+## Payara upgrade
+
+*   Payara maven configuration was updated: it can run on the same code base and jdk 11
