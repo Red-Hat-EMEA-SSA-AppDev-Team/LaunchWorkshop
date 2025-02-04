@@ -27,6 +27,6 @@ Choices
 
 *   Using the internal or an external registry ?
 *   Using existing Prometheus User Workload monitoring, and it is installed ?
-*   Using Loki (requires Minio), or an external solution ?
-*   Using Tempo (requires Minio), or an external solution ?
+*   Using Loki (requires object storage by a supported provided, e.g. [Red Hat OpenShift Data Foundation](https://www.redhat.com/en/technologies/cloud-computing/openshift-data-foundation) or [MinIO](https://min.io/)), or an external solution ?
+*   Using Tempo (requires object storage by a supported provided, e.g. [Red Hat OpenShift Data Foundation](https://www.redhat.com/en/technologies/cloud-computing/openshift-data-foundation) or [MinIO](https://min.io/)), or an external solution ?
 *   Storage class allowing the on-demand creation of RWO PV ?
