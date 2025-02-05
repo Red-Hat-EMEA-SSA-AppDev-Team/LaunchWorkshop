@@ -21,7 +21,7 @@ We're going to simulate the deployment of the Cargo Tracker application in 2 dif
 A Kustomize-ready example has been deploy to the Git repo:
 
 ```plaintext
-<URL_without_user_suffix>
+<url_without_user_suffix>
 ```
 
 #### Configuring ArgoCD Applications
@@ -33,13 +33,13 @@ Let's first complete the setup of ArgoCD:
 *   Create the namespaces for the users
 
 ```plaintext
-oc process -f resources/automate/argo/argo-namespaces.yaml -p USER=user1 | oc apply -f -
+oc process -f resources/automate/cargo/argo/argo-namespaces.yaml -p USER=user1 | oc apply -f -
 ```
 
 *   Allow ArgoCD to edit those namespaces
 
 ```plaintext
-oc process -f resources/automate/argo/argo-roles.yaml -p USER=user1 | oc apply -f -
+oc process -f resources/automate/cargo/argo/argo-roles.yaml -p USER=user1 | oc apply -f -
 ```
 
 Alternatively:
@@ -67,7 +67,7 @@ Provide the following information
 Application Name: cargo-dev-<your_user>
 Project Name: default
 
-SOURCE repository URL: <URL_without_user_suffix>
+SOURCE repository URL: <url_without_user_suffix>
 SOURCE path: <your_user>/dev/overlays
 
 DESTINATION cluster URL:https://kubernetes.default.svc
@@ -80,7 +80,7 @@ Do the same for the second “environment”
 Application Name: cargo-prod-<your_user>
 Project Name: default
 
-SOURCE repository URL: <URL_without_user_suffix>
+SOURCE repository URL: <url_without_user_suffix>
 SOURCE path: <your_user>/prod/overlays
 
 DESTINATION cluster URL:https://kubernetes.default.svc
@@ -107,7 +107,7 @@ destination:
 project: default
 source:
   path: <your_user>/dev/overlays
-  repoURL: <URL_without_user_suffix>
+  repoURL: <url_without_user_suffix>
 ```
 
 Do the same for the second “environment”.
@@ -120,7 +120,7 @@ destination:
 project: default
 source:
   path: <your_user>/prod/overlays
-  repoURL: <URL_without_user_suffix>
+  repoURL: <url_without_user_suffix>
 ```
 
 The Application will appear on the ArgoCD UI.
@@ -128,7 +128,7 @@ The Application will appear on the ArgoCD UI.
 _**ArgoCD  Applications using a yaml file**_
 
 ```plaintext
-oc process -f resources/automate/argo/argo-apps.yaml -p USER=user1 | oc apply -f -
+oc process -f resources/automate/cargo/argo/argo-apps.yaml -p USER=user1 | oc apply -f -
 ```
 
 #### Operating deployments with ArgoCD
@@ -137,9 +137,9 @@ Now is the turn of the Developers, to push changes to the Gith repository.
 
 ```plaintext
 cd /tmp
-git clone <URL_without_user_suffix>/<user>
+git clone <url_without_user_suffix>/<user>
 cd <user>
-cp <~>/resources/automate/cargo/kustomize/dev/base/cargo-*.yaml  dev/base/
+cp $/resources/automate/cargo/kustomize/dev/base/cargo-*.yaml  dev/base/
 git add . --all
 git commit -m "add files to dev"
 git push <user> openshift
@@ -183,9 +183,9 @@ Once the tag exists, we can deploy the application in this “production” envi
 Of course, in this environment, we don't need the build artifacts
 
 ```plaintext
-cp <~>/resources/automate/cargo/kustomize/prod/base/cargo-deployment-*.yaml  prod/base/
-cp <~>/resources/automate/cargo/kustomize/prod/base/cargo-service*.yaml  prod/base/
-cp <~>/resources/automate/cargo/kustomize/prod/base/cargo-route*.yaml  prod/base/
+cp $/resources/automate/cargo/kustomize/prod/base/cargo-deployment-*.yaml  prod/base/
+cp $/resources/automate/cargo/kustomize/prod/base/cargo-service*.yaml  prod/base/
+cp $/resources/automate/cargo/kustomize/prod/base/cargo-route*.yaml  prod/base/
 git add prod/base --all
 git commit -m "promote files to prod"
 git push <user> openshift

@@ -1,0 +1,930 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: cargo-pipeline-run1
+  labels:
+    tekton.dev/pipeline: cargo-pipeline
+spec:
+  pipelineRef:
+    name: pipeline-build
+  taskRunTemplate:
+    serviceAccountName: pipeline
+  timeouts:
+    pipeline: 1h0m0s
+  workspaces:
+    - name: source-code
+      persistentVolumeClaim:
+        claimName: source-code-pvc
+    - name: registry-config
+      secret:
+        secretName: pipeline-registry-auth
+  pipelineSpec:
+    tasks:
+      - name: git-clone
+        params:
+          - name: url
+            value: 'https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker'
+          - name: revision
+            value: jee7-eap7
+          - name: refspec
+            value: ''
+          - name: submodules
+            value: 'true'
+          - name: depth
+            value: '1'
+          - name: sslVerify
+            value: 'true'
+          - name: crtFileName
+            value: ca-bundle.crt
+          - name: subdirectory
+            value: ''
+          - name: sparseCheckoutDirectories
+            value: ''
+          - name: deleteExisting
+            value: 'true'
+          - name: httpProxy
+            value: ''
+          - name: httpsProxy
+            value: ''
+          - name: noProxy
+            value: ''
+          - name: verbose
+            value: 'true'
+          - name: gitInitImage
+            value: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2'
+          - name: userHome
+            value: /home/git
+        taskRef:
+          kind: Task
+          name: git-clone
+        workspaces:
+          - name: output
+            workspace: source-code
+        status:
+          taskSpec:
+            description: |-
+              These Tasks are Git tasks to work with repositories used by other tasks in your Pipeline.
+              The git-clone Task will clone a repo from the provided url into the output Workspace. By default the repo will be cloned into the root of your Workspace. You can clone into a subdirectory by setting this Task's subdirectory param. This Task also supports sparse checkouts. To perform a sparse checkout, pass a list of comma separated directory patterns to this Task's sparseCheckoutDirectories param.
+            params:
+              - description: Repository URL to clone from.
+                name: url
+                type: string
+              - default: ''
+                description: 'Revision to checkout. (branch, tag, sha, ref, etc...)'
+                name: revision
+                type: string
+              - default: ''
+                description: Refspec to fetch before checking out revision.
+                name: refspec
+                type: string
+              - default: 'true'
+                description: Initialize and fetch git submodules.
+                name: submodules
+                type: string
+              - default: '1'
+                description: 'Perform a shallow clone, fetching only the most recent N commits.'
+                name: depth
+                type: string
+              - default: 'true'
+                description: Set the `http.sslVerify` global git config. Setting this to `false` is not advised unless you are sure that you trust your git remote.
+                name: sslVerify
+                type: string
+              - default: ca-bundle.crt
+                description: file name of mounted crt using ssl-ca-directory workspace. default value is ca-bundle.crt.
+                name: crtFileName
+                type: string
+              - default: ''
+                description: Subdirectory inside the `output` Workspace to clone the repo into.
+                name: subdirectory
+                type: string
+              - default: ''
+                description: Define the directory patterns to match or exclude when performing a sparse checkout.
+                name: sparseCheckoutDirectories
+                type: string
+              - default: 'true'
+                description: Clean out the contents of the destination directory if it already exists before cloning.
+                name: deleteExisting
+                type: string
+              - default: ''
+                description: HTTP proxy server for non-SSL requests.
+                name: httpProxy
+                type: string
+              - default: ''
+                description: HTTPS proxy server for SSL requests.
+                name: httpsProxy
+                type: string
+              - default: ''
+                description: Opt out of proxying HTTP/HTTPS requests.
+                name: noProxy
+                type: string
+              - default: 'true'
+                description: Log the commands that are executed during `git-clone`'s operation.
+                name: verbose
+                type: string
+              - default: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2'
+                description: The image providing the git-init binary that this Task runs.
+                name: gitInitImage
+                type: string
+              - default: /home/git
+                description: |
+                  Absolute path to the user's home directory.
+                name: userHome
+                type: string
+            results:
+              - description: The precise commit SHA that was fetched by this Task.
+                name: commit
+                type: string
+              - description: The precise URL that was fetched by this Task.
+                name: url
+                type: string
+              - description: The epoch timestamp of the commit that was fetched by this Task.
+                name: committer-date
+                type: string
+            steps:
+              - computeResources: {}
+                env:
+                  - name: HOME
+                    value: /home/git
+                  - name: PARAM_URL
+                    value: 'https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker'
+                  - name: PARAM_REVISION
+                    value: jee7-eap7
+                  - name: PARAM_REFSPEC
+                  - name: PARAM_SUBMODULES
+                    value: 'true'
+                  - name: PARAM_DEPTH
+                    value: '1'
+                  - name: PARAM_SSL_VERIFY
+                    value: 'true'
+                  - name: PARAM_CRT_FILENAME
+                    value: ca-bundle.crt
+                  - name: PARAM_SUBDIRECTORY
+                  - name: PARAM_DELETE_EXISTING
+                    value: 'true'
+                  - name: PARAM_HTTP_PROXY
+                  - name: PARAM_HTTPS_PROXY
+                  - name: PARAM_NO_PROXY
+                  - name: PARAM_VERBOSE
+                    value: 'true'
+                  - name: PARAM_SPARSE_CHECKOUT_DIRECTORIES
+                  - name: PARAM_USER_HOME
+                    value: /home/git
+                  - name: WORKSPACE_OUTPUT_PATH
+                    value: /workspace/output
+                  - name: WORKSPACE_SSH_DIRECTORY_BOUND
+                    value: 'false'
+                  - name: WORKSPACE_SSH_DIRECTORY_PATH
+                  - name: WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND
+                    value: 'false'
+                  - name: WORKSPACE_BASIC_AUTH_DIRECTORY_PATH
+                  - name: WORKSPACE_SSL_CA_DIRECTORY_BOUND
+                    value: 'false'
+                  - name: WORKSPACE_SSL_CA_DIRECTORY_PATH
+                image: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2'
+                name: clone
+                script: |
+                  #!/usr/bin/env sh
+                  set -eu
+
+                  if [ "${PARAM_VERBOSE}" = "true" ] ; then
+                    set -x
+                  fi
+
+                  if [ "${WORKSPACE_BASIC_AUTH_DIRECTORY_BOUND}" = "true" ] ; then
+                    cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.git-credentials" "${PARAM_USER_HOME}/.git-credentials"
+                    cp "${WORKSPACE_BASIC_AUTH_DIRECTORY_PATH}/.gitconfig" "${PARAM_USER_HOME}/.gitconfig"
+                    chmod 400 "${PARAM_USER_HOME}/.git-credentials"
+                    chmod 400 "${PARAM_USER_HOME}/.gitconfig"
+                  fi
+
+                  if [ "${WORKSPACE_SSH_DIRECTORY_BOUND}" = "true" ] ; then
+                    cp -R "${WORKSPACE_SSH_DIRECTORY_PATH}" "${PARAM_USER_HOME}"/.ssh
+                    chmod 700 "${PARAM_USER_HOME}"/.ssh
+                    chmod -R 400 "${PARAM_USER_HOME}"/.ssh/*
+                  fi
+
+                  if [ "${WORKSPACE_SSL_CA_DIRECTORY_BOUND}" = "true" ] ; then
+                     export GIT_SSL_CAPATH="${WORKSPACE_SSL_CA_DIRECTORY_PATH}"
+                     if [ "${PARAM_CRT_FILENAME}" != "" ] ; then
+                        export GIT_SSL_CAINFO="${WORKSPACE_SSL_CA_DIRECTORY_PATH}/${PARAM_CRT_FILENAME}"
+                     fi
+                  fi
+                  CHECKOUT_DIR="${WORKSPACE_OUTPUT_PATH}/${PARAM_SUBDIRECTORY}"
+
+                  cleandir() {
+                    # Delete any existing contents of the repo directory if it exists.
+                    #
+                    # We don't just "rm -rf ${CHECKOUT_DIR}" because ${CHECKOUT_DIR} might be "/"
+                    # or the root of a mounted volume.
+                    if [ -d "${CHECKOUT_DIR}" ] ; then
+                      # Delete non-hidden files and directories
+                      rm -rf "${CHECKOUT_DIR:?}"/*
+                      # Delete files and directories starting with . but excluding ..
+                      rm -rf "${CHECKOUT_DIR}"/.[!.]*
+                      # Delete files and directories starting with .. plus any other character
+                      rm -rf "${CHECKOUT_DIR}"/..?*
+                    fi
+                  }
+
+                  if [ "${PARAM_DELETE_EXISTING}" = "true" ] ; then
+                    cleandir || true
+                  fi
+
+                  test -z "${PARAM_HTTP_PROXY}" || export HTTP_PROXY="${PARAM_HTTP_PROXY}"
+                  test -z "${PARAM_HTTPS_PROXY}" || export HTTPS_PROXY="${PARAM_HTTPS_PROXY}"
+                  test -z "${PARAM_NO_PROXY}" || export NO_PROXY="${PARAM_NO_PROXY}"
+
+                  git config --global --add safe.directory "${WORKSPACE_OUTPUT_PATH}"
+                  /ko-app/git-init \
+                    -url="${PARAM_URL}" \
+                    -revision="${PARAM_REVISION}" \
+                    -refspec="${PARAM_REFSPEC}" \
+                    -path="${CHECKOUT_DIR}" \
+                    -sslVerify="${PARAM_SSL_VERIFY}" \
+                    -submodules="${PARAM_SUBMODULES}" \
+                    -depth="${PARAM_DEPTH}" \
+                    -sparseCheckoutDirectories="${PARAM_SPARSE_CHECKOUT_DIRECTORIES}"
+                  cd "${CHECKOUT_DIR}"
+                  RESULT_SHA="$(git rev-parse HEAD)"
+                  EXIT_CODE="$?"
+                  if [ "${EXIT_CODE}" != 0 ] ; then
+                    exit "${EXIT_CODE}"
+                  fi
+                  RESULT_COMMITTER_DATE="$(git log -1 --pretty=%ct)"
+                  printf "%s" "${RESULT_COMMITTER_DATE}" > "/tekton/results/committer-date"
+                  printf "%s" "${RESULT_SHA}" > "/tekton/results/commit"
+                  printf "%s" "${PARAM_URL}" > "/tekton/results/url"
+                securityContext:
+                  runAsNonRoot: true
+                  runAsUser: 65532
+            workspaces:
+              - description: The git repo will be cloned onto the volume backing this Workspace.
+                name: output
+              - description: |
+                  A .ssh directory with private key, known_hosts, config, etc. Copied to
+                  the user's home before git commands are executed. Used to authenticate
+                  with the git remote when performing the clone. Binding a Secret to this
+                  Workspace is strongly recommended over other volume types.
+                name: ssh-directory
+                optional: true
+              - description: |
+                  A Workspace containing a .gitconfig and .git-credentials file. These
+                  will be copied to the user's home before any git commands are run. Any
+                  other files in this Workspace are ignored. It is strongly recommended
+                  to use ssh-directory over basic-auth whenever possible and to bind a
+                  Secret to this Workspace over other volume types.
+                name: basic-auth
+                optional: true
+              - description: |
+                  A workspace containing CA certificates, this will be used by Git to
+                  verify the peer with when fetching or pushing over HTTPS.
+                name: ssl-ca-directory
+                optional: true
+          artifacts: {}
+          provenance:
+            featureFlags:
+              EnableConciseResolverSyntax: false
+              MaxResultSize: 4096
+              AwaitSidecarReadiness: true
+              Coschedule: workspaces
+              ResultExtractionMethod: termination-message
+              EnableParamEnum: false
+              SendCloudEventsForRuns: false
+              EnforceNonfalsifiability: none
+              SetSecurityContext: false
+              DisableCredsInit: false
+              DisableAffinityAssistant: true
+              EnableStepActions: true
+              EnableAPIFields: beta
+              RequireGitSSHSecretKnownHosts: false
+              EnableKubernetesSidecar: false
+              RunningInEnvWithInjectedSidecars: true
+              EnableKeepPodOnCancel: false
+              VerificationNoMatchPolicy: ignore
+              EnableProvenanceInStatus: true
+              DisableInlineSpec: ''
+              EnableArtifacts: false
+              EnableCELInWhenExpression: false
+          steps:
+            - container: step-clone
+              imageID: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init@sha256:176c1d67371296b29447cef5478ad50cc6546ad858d34122e626b3a12d225436'
+              name: clone
+              terminated:
+                containerID: 'cri-o://db7fb2ecbbe6e80f6e59a876b2af71e6a16cd2eab7859dc8c9e200cdb5345b99'
+                exitCode: 0
+                finishedAt: '2025-02-05T09:17:20Z'
+                message: '[{"key":"commit","value":"2a79efb827a026dfc65ba6040f8b1ea328faf2bc","type":1},{"key":"committer-date","value":"1738257971","type":1},{"key":"url","value":"https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker","type":1}]'
+                reason: Completed
+                startedAt: '2025-02-05T09:17:20Z'
+              terminationReason: Completed
+          completionTime: '2025-02-05T09:17:20Z'
+          startTime: '2025-02-05T09:17:12Z'
+          podName: cargo-build-j3fmsa-git-clone-pod
+          results:
+            - name: commit
+              type: string
+              value: 2a79efb827a026dfc65ba6040f8b1ea328faf2bc
+            - name: committer-date
+              type: string
+              value: '1738257971'
+            - name: url
+              type: string
+              value: 'https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker'
+          conditions:
+            - lastTransitionTime: '2025-02-05T09:17:20Z'
+              message: All Steps have completed executing
+              reason: Succeeded
+              status: 'True'
+              type: Succeeded
+          duration: 8s
+          reason: Succeeded
+      - name: maven
+        params:
+          - name: GOALS
+            value:
+              - package
+          - name: MAVEN_MIRROR_URL
+            value: ''
+          - name: SUBDIRECTORY
+            value: .
+        runAfter:
+          - git-clone
+        taskRef:
+          params:
+            - name: kind
+              value: task
+            - name: name
+              value: maven
+            - name: namespace
+              value: openshift-pipelines
+          resolver: cluster
+        workspaces:
+          - name: source
+            workspace: source-code
+        status:
+          artifacts: {}
+          completionTime: '2025-02-05T09:17:36Z'
+          conditions:
+            - lastTransitionTime: '2025-02-05T09:17:36Z'
+              message: All Steps have completed executing
+              reason: Succeeded
+              status: 'True'
+              type: Succeeded
+          podName: cargo-build-j3fmsa-maven-pod
+          provenance:
+            featureFlags:
+              EnableConciseResolverSyntax: false
+              MaxResultSize: 4096
+              AwaitSidecarReadiness: true
+              Coschedule: workspaces
+              ResultExtractionMethod: termination-message
+              EnableParamEnum: false
+              SendCloudEventsForRuns: false
+              EnforceNonfalsifiability: none
+              SetSecurityContext: false
+              DisableCredsInit: false
+              DisableAffinityAssistant: true
+              EnableStepActions: true
+              EnableAPIFields: beta
+              RequireGitSSHSecretKnownHosts: false
+              EnableKubernetesSidecar: false
+              RunningInEnvWithInjectedSidecars: true
+              EnableKeepPodOnCancel: false
+              VerificationNoMatchPolicy: ignore
+              EnableProvenanceInStatus: true
+              DisableInlineSpec: ''
+              EnableArtifacts: false
+              EnableCELInWhenExpression: false
+            refSource:
+              digest:
+                sha256: 32b512771eae89750db22daad45b46576168b369165fe6028405938587c78995
+              uri: /apis/tekton.dev/v1/namespaces/openshift-pipelines/task/maven@03f4a011-a3fc-4052-9153-1e674c05ca87
+          startTime: '2025-02-05T09:17:21Z'
+          steps:
+            - container: step-maven-generate
+              imageID: 'registry.redhat.io/ubi8/ubi-minimal@sha256:599016a2df42946faf9f3743caa92ee9c96e0d9d4babff301ea7f445356edb31'
+              name: maven-generate
+              terminated:
+                containerID: 'cri-o://0b019ba2ef7be8bf865ff1e47daa8983ca8f696459049bc39c185cc0eeb1de95'
+                exitCode: 0
+                finishedAt: '2025-02-05T09:17:27Z'
+                reason: Completed
+                startedAt: '2025-02-05T09:17:27Z'
+              terminationReason: Completed
+            - container: step-maven-goals
+              imageID: 'registry.redhat.io/ubi8/openjdk-17@sha256:6a4f98b98a84ec7b774a0462091724c62c0a1ee7d24923822ed8450bea0ce8b1'
+              name: maven-goals
+              terminated:
+                containerID: 'cri-o://36a1829270a01ac774c45710d215cc84364cc08852699f4bc3976d9f6a199b8b'
+                exitCode: 0
+                finishedAt: '2025-02-05T09:17:35Z'
+                reason: Completed
+                startedAt: '2025-02-05T09:17:27Z'
+              terminationReason: Completed
+          taskSpec:
+            description: This Task can be used to run a Maven build.
+            params:
+              - default:
+                  - package
+                description: maven goals to run
+                name: GOALS
+                type: array
+              - default: ''
+                description: The Maven repository mirror url
+                name: MAVEN_MIRROR_URL
+                type: string
+              - default: .
+                description: The subdirectory within the repository for sources on which we want to execute maven goals.
+                name: SUBDIRECTORY
+                type: string
+            stepTemplate:
+              computeResources: {}
+              env:
+                - name: PARAMS_MAVEN_MIRROR_URL
+                - name: PARAMS_SUBDIRECTORY
+                  value: .
+                - name: WORKSPACES_SOURCE_PATH
+                  value: /workspace/source
+                - name: WORKSPACES_SOURCE_BOUND
+                  value: 'true'
+                - name: WORKSPACES_SERVER_SECRET_PATH
+                - name: WORKSPACES_SERVER_SECRET_BOUND
+                  value: 'false'
+                - name: WORKSPACES_PROXY_SECRET_PATH
+                - name: WORKSPACES_PROXY_SECRET_BOUND
+                  value: 'false'
+                - name: WORKSPACES_PROXY_CONFIGMAP_PATH
+                - name: WORKSPACES_PROXY_CONFIGMAP_BOUND
+                  value: 'false'
+                - name: WORKSPACES_MAVEN_SETTINGS_PATH
+                - name: WORKSPACES_MAVEN_SETTINGS_BOUND
+                  value: 'false'
+            steps:
+              - computeResources: {}
+                env:
+                  - name: HOME
+                    value: /tekton/home
+                image: 'registry.redhat.io/ubi8/ubi-minimal@sha256:c12e67af6a7e15113d76bc72f10bef2045c026c71ec8b7124c8a075458188a83'
+                name: maven-generate
+                script: |
+                  set -e
+                  printf '%s' "IyEvdXNyL2Jpbi9lbnYgYmFzaAoKZGVjbGFyZSAtcnggTUFWRU5fR0VORVJBVEVfRElSRUNUT1JZPSIke1dPUktTUEFDRVNfU09VUkNFX1BBVEh9LyR7UEFSQU1TX1NVQkRJUkVDVE9SWX0vbWF2ZW4tZ2VuZXJhdGUiCgpkZWNsYXJlIC1yeCBNQVZFTl9TRVRUSU5HU19GSUxFPSIke01BVkVOX0dFTkVSQVRFX0RJUkVDVE9SWX0vc2V0dGluZ3MueG1sIgoKaWYgW1sgLWYgJHtNQVZFTl9TRVRUSU5HU19GSUxFfSBdXTsgdGhlbgogICAgZWNobyAidXNpbmcgZXhpc3RpbmcgJyR7TUFWRU5fU0VUVElOR1NfRklMRX0nIgogICAgY2F0ICR7TUFWRU5fU0VUVElOR1NfRklMRX0KICAgIGV4aXQgMApmaQoKbWtkaXIgIiR7TUFWRU5fR0VORVJBVEVfRElSRUNUT1JZfSIKCiMgQ2hlY2sgaWYgc2V0dGluZ3MueG1sIGV4aXN0cyBpbiB0aGUgd29ya3NwYWNlIG1hdmVuLXNldHRpbmdzCmlmIFtbIC1mICIke1dPUktTUEFDRVNfTUFWRU5fU0VUVElOR1NfUEFUSH0vc2V0dGluZ3MueG1sIiBdXTsgdGhlbgogICAgY3AgIiR7V09SS1NQQUNFU19NQVZFTl9TRVRUSU5HU19QQVRIfS9zZXR0aW5ncy54bWwiICIke01BVkVOX1NFVFRJTkdTX0ZJTEV9IgogICAgZWNobyAiVXNpbmcgJyR7TUFWRU5fU0VUVElOR1NfRklMRX0nIGNvcGllZCBmcm9tIG9wdGlvbmFsIHdvcmtzcGFjZSBtYXZlbi1zZXR0aW5ncyIKICAgIGNhdCAke01BVkVOX1NFVFRJTkdTX0ZJTEV9CiAgICBleGl0IDAKZmkKCmNhdCA+ICIke01BVkVOX1NFVFRJTkdTX0ZJTEV9IiA8PEVPRgo8c2V0dGluZ3M+CiAgICA8c2VydmVycz4KICAgIDwhLS0gVGhlIHNlcnZlcnMgYWRkZWQgaGVyZSBhcmUgZ2VuZXJhdGVkIGZyb20gZW52aXJvbm1lbnQgdmFyaWFibGVzLiBEb24ndCBjaGFuZ2UuIC0tPgogICAgPCEtLSAjIyMgU0VSVkVSJ3MgVVNFUiBJTkZPIGZyb20gRU5WICMjIyAtLT4KICAgIDwvc2VydmVycz4KICAgIDxtaXJyb3JzPgogICAgPCEtLSBUaGUgbWlycm9ycyBhZGRlZCBoZXJlIGFyZSBnZW5lcmF0ZWQgZnJvbSBlbnZpcm9ubWVudCB2YXJpYWJsZXMuIERvbid0IGNoYW5nZS4gLS0+CiAgICA8IS0tICMjIyBtaXJyb3JzIGZyb20gRU5WICMjIyAtLT4KICAgIDwvbWlycm9ycz4KICAgIDxwcm94aWVzPgogICAgPCEtLSBUaGUgcHJveGllcyBhZGRlZCBoZXJlIGFyZSBnZW5lcmF0ZWQgZnJvbSBlbnZpcm9ubWVudCB2YXJpYWJsZXMuIERvbid0IGNoYW5nZS4gLS0+CiAgICA8IS0tICMjIyBIVFRQIHByb3h5IGZyb20gRU5WICMjIyAtLT4KICAgIDwvcHJveGllcz4KPC9zZXR0aW5ncz4KRU9GCgpjYXQgIiR7TUFWRU5fU0VUVElOR1NfRklMRX0iCgp4bWw9IiIKaWYgW1sgIiR7V09SS1NQQUNFU19QUk9YWV9TRUNSRVRfQk9VTkR9IiA9PSAidHJ1ZSIgXV07IHRoZW4KICAgIGlmIHRlc3QgLWYgJHtXT1JLU1BBQ0VTX1BST1hZX1NFQ1JFVF9QQVRIfS91c2VybmFtZSAmJiB0ZXN0IC1mICR7V09SS1NQQUNFU19QUk9YWV9TRUNSRVRfUEFUSH0vcGFzc3dvcmQ7IHRoZW4KICAgIFBBUkFNU19QUk9YWV9VU0VSPSQoY2F0ICR7V09SS1NQQUNFU19QUk9YWV9TRUNSRVRfUEFUSH0vdXNlcm5hbWUpCiAgICBQQVJBTVNfUFJPWFlfUEFTU1dPUkQ9JChjYXQgJHtXT1JLU1BBQ0VTX1BST1hZX1NFQ1JFVF9QQVRIfS9wYXNzd29yZCkKCiAgICAjIEZldGNoaW5nIHByb3h5IGNvbmZpZ3VyYXRpb24gdmFsdWVzIGZyb20gQ29uZmlnTWFwIHdvcmtzcGFjZQogICAgUEFSQU1TX1BST1hZX0hPU1Q9JChjYXQgJHtXT1JLU1BBQ0VTX1BST1hZX0NPTkZJR01BUF9QQVRIfS9wcm94eV9ob3N0KQogICAgUEFSQU1TX1BST1hZX1BPUlQ9JChjYXQgJHtXT1JLU1BBQ0VTX1BST1hZX0NPTkZJR01BUF9QQVRIfS9wcm94eV9wb3J0KQogICAgUEFSQU1TX1BST1hZX1BST1RPQ09MPSQoY2F0ICR7V09SS1NQQUNFU19QUk9YWV9DT05GSUdNQVBfUEFUSH0vcHJveHlfcHJvdG9jb2wpCiAgICBQQVJBTVNfUFJPWFlfTk9OX1BST1hZX0hPU1RTPSQoY2F0ICR7V09SS1NQQUNFU19QUk9YWV9DT05GSUdNQVBfUEFUSH0vcHJveHlfbm9uX3Byb3h5X2hvc3RzKQoKICAgIGlmIFsgLW4gIiR7UEFSQU1TX1BST1hZX0hPU1R9IiAtYSAtbiAiJHtQQVJBTVNfUFJPWFlfUE9SVH0iIF07IHRoZW4KICAgICAgICB4bWw9Ijxwcm94eT5cCiAgICAgICAgPGlkPmdlbnByb3h5PC9pZD5cCiAgICAgICAgPGFjdGl2ZT50cnVlPC9hY3RpdmU+XAogICAgICAgIDxwcm90b2NvbD4ke1BBUkFNU19QUk9YWV9QUk9UT0NPTH08L3Byb3RvY29sPlwKICAgICAgICA8aG9zdD4ke1BBUkFNU19QUk9YWV9IT1NUfTwvaG9zdD5cCiAgICAgICAgPHBvcnQ+JHtQQVJBTVNfUFJPWFlfUE9SVH08L3BvcnQ+IgogICAgICAgIGlmIFsgLW4gIiR7UEFSQU1TX1BST1hZX1VTRVJ9IiAtYSAtbiAiJHtQQVJBTVNfUFJPWFlfUEFTU1dPUkR9IiBdOyB0aGVuCiAgICAgICAgICAgIHhtbD0iJHhtbFwKICAgICAgICAgICAgPHVzZXJuYW1lPiR7UEFSQU1TX1BST1hZX1VTRVJ9PC91c2VybmFtZT5cCiAgICAgICAgICAgIDxwYXNzd29yZD4ke1BBUkFNU19QUk9YWV9QQVNTV09SRH08L3Bhc3N3b3JkPiIKICAgICAgICBmaQogICAgICAgIGlmIFsgLW4gIiR7UEFSQU1TX1BST1hZX05PTl9QUk9YWV9IT1NUU30iIF07IHRoZW4KICAgICAgICAgICAgeG1sPSIkeG1sXAogICAgICAgICAgICA8bm9uUHJveHlIb3N0cz4ke1BBUkFNU19QUk9YWV9OT05fUFJPWFlfSE9TVFN9PC9ub25Qcm94eUhvc3RzPiIKICAgICAgICBmaQogICAgICAgIHhtbD0iJHhtbFwKICAgICAgICA8L3Byb3h5PiIKICAgICAgICBzZWQgLWkgInN8PCEtLSAjIyMgSFRUUCBwcm94eSBmcm9tIEVOViAjIyMgLS0+fCR4bWx8IiAke01BVkVOX1NFVFRJTkdTX0ZJTEV9CiAgICBmaQogICAgZWxzZQogICAgICAgIGVjaG8gIm5vICd1c2VybmFtZScgb3IgJ3Bhc3N3b3JkJyBmaWxlIGZvdW5kIGF0IHdvcmtzcGFjZSBwcm94eV9zZWNyZXQiCiAgICAgICAgZXhpdCAxCiAgICBmaQpmaQoKaWYgW1sgIiR7V09SS1NQQUNFU19TRVJWRVJfU0VDUkVUX0JPVU5EfSIgPT0gInRydWUiIF1dOyB0aGVuCiAgICBpZiB0ZXN0IC1mICR7V09SS1NQQUNFU19TRVJWRVJfU0VDUkVUX1BBVEh9L3VzZXJuYW1lICYmIHRlc3QgLWYke1dPUktTUEFDRVNfU0VSVkVSX1NFQ1JFVF9QQVRIfS9wYXNzd29yZDsgdGhlbgoJU0VSVkVSX1VTRVI9JChjYXQgJHtXT1JLU1BBQ0VTX1NFUlZFUl9TRUNSRVRfUEFUSH0vdXNlcm5hbWUpCglTRVJWRVJfUEFTU1dPUkQ9JChjYXQgJHtXT1JLU1BBQ0VTX1NFUlZFUl9TRUNSRVRfUEFUSH0vcGFzc3dvcmQpCglpZiBbIC1uICIke1NFUlZFUl9VU0VSfSIgLWEgLW4gIiR7U0VSVkVSX1BBU1NXT1JEfSIgXTsgdGhlbgoJICAgIHhtbD0iPHNlcnZlcj5cCiAgICAgICAgPGlkPnNlcnZlcmlkPC9pZD4iCgkgICAgeG1sPSIkeG1sXAogICAgICAgIDx1c2VybmFtZT4ke1NFUlZFUl9VU0VSfTwvdXNlcm5hbWU+XAogICAgICAgIDxwYXNzd29yZD4ke1NFUlZFUl9QQVNTV09SRH08L3Bhc3N3b3JkPiIKCSAgICB4bWw9IiR4bWxcCiAgICAgICAgPC9zZXJ2ZXI+IgoJICAgIHNlZCAtaSAic3w8IS0tICMjIyBTRVJWRVIncyBVU0VSIElORk8gZnJvbSBFTlYgIyMjIC0tPnwkeG1sfCIgJHtNQVZFTl9TRVRUSU5HU19GSUxFfQoJICAgIGVjaG8gIlNFUlZFUiBDcmVkcyBVcGRhdGVkIgoJZmkKICAgIGVsc2UKCWVjaG8gIm5vICd1c2VyJyBvciAncGFzc3dvcmQnIGZpbGUgZm91bmQgYXQgd29ya3NwYWNlIHNlcnZlcl9zZWNyZXQiCiAgICAgICAgZXhpdCAxCiAgICBmaQpmaQoKaWYgWyAtbiAiJHtQQVJBTVNfTUFWRU5fTUlSUk9SX1VSTH0iIF07IHRoZW4KICAgIHhtbD0iICAgIDxtaXJyb3I+XAogICAgPGlkPm1pcnJvci5kZWZhdWx0PC9pZD5cCiAgICA8dXJsPiR7UEFSQU1TX01BVkVOX01JUlJPUl9VUkx9PC91cmw+XAogICAgPG1pcnJvck9mPmNlbnRyYWw8L21pcnJvck9mPlwKICAgIDwvbWlycm9yPiIKICAgIHNlZCAtaSAic3w8IS0tICMjIyBtaXJyb3JzIGZyb20gRU5WICMjIyAtLT58JHhtbHwiICR7TUFWRU5fU0VUVElOR1NfRklMRX0KZmkK" |base64 -d >"/scripts/maven-generate.sh"
+                  chmod +x /scripts/maven-*.sh;echo "Running Script /scripts/maven-generate.sh";
+                    /scripts/maven-generate.sh;
+                securityContext:
+                  runAsNonRoot: true
+                  runAsUser: 65532
+                volumeMounts:
+                  - mountPath: /scripts
+                    name: scripts-dir
+                  - mountPath: /maven-generate
+                    name: maven-settings-dir
+              - name: maven-goals
+                command:
+                  - /usr/bin/mvn
+                env:
+                  - name: HOME
+                    value: /tekton/home
+                computeResources: {}
+                securityContext:
+                  runAsNonRoot: true
+                  runAsUser: 65532
+                volumeMounts:
+                  - mountPath: /maven-generate
+                    name: maven-settings-dir
+                image: 'registry.redhat.io/ubi8/openjdk-17@sha256:e5fc9e34382da41b10d4ea566639d31707493abff9e8de81f5accfd66876409e'
+                workingDir: /workspace/source/.
+                args:
+                  - '-s'
+                  - maven-generate/settings.xml
+                  - package
+            volumes:
+              - emptyDir: {}
+                name: scripts-dir
+              - emptyDir: {}
+                name: maven-settings-dir
+            workspaces:
+              - description: The workspace consisting of maven project.
+                name: source
+              - description: The workspace containing server secrets (username and password)
+                name: server_secret
+                optional: true
+              - description: 'The workspace containing proxy server access credentials (username, password).'
+                name: proxy_secret
+                optional: true
+              - description: 'The workspace containing some proxy values (proxy_port,proxy_host,proxy_protocol,proxy_non_proxy_hosts)'
+                name: proxy_configmap
+                optional: true
+              - description: The workspace consisting of the custom maven settings provided by the user.
+                name: maven_settings
+                optional: true
+          duration: 15s
+          reason: Succeeded
+      - name: s2i
+        params:
+          - name: BUILDER_IMAGE
+            value: registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8
+          - name: IMAGE
+            value: cargo-app-pipeline
+          - name: PATH_CONTEXT
+            value: ./target
+          - name: LOGLEVEL
+            value: '0'
+        runAfter:
+          - maven
+        taskRef:
+          kind: Task
+          name: cargo-s2i
+        workspaces:
+          - name: source
+            workspace: source-code
+          - name: dockerconfig
+            workspace: registry-config
+        status:
+          taskSpec:
+            description: |-
+              Source-to-Image (S2I) is a toolkit and workflow for building reproducible container images from source code
+              S2I produces images by injecting source code into a base S2I container image and letting the container prepare that source code for execution. The base S2I container images contains the language runtime and build tools needed for building and running the source code.
+            params:
+              - description: The location of the s2i builder image.
+                name: BUILDER_IMAGE
+                type: string
+              - description: Reference of the image S2I will produce.
+                name: IMAGE
+                type: string
+              - default: .
+                description: The location of the path to run s2i from.
+                name: PATH_CONTEXT
+                type: string
+              - default: '0'
+                description: Log level when running the S2I binary
+                name: LOGLEVEL
+                type: string
+            results:
+              - description: Digest of the image just built.
+                name: IMAGE_DIGEST
+                type: string
+              - description: name of the generated dockerfile
+                name: DOCKER_FILENAME
+                type: string
+            steps:
+              - command:
+                  - /usr/local/bin/s2i
+                  - '--loglevel=0'
+                  - build
+                  - ./target
+                  - registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8
+                  - '--as-dockerfile'
+                  - ./Dockerfile.gen
+                computeResources: {}
+                image: 'quay.io/openshift-pipeline/s2i:nightly'
+                name: generate
+                workingDir: /workspace/source
+              - computeResources: {}
+                image: 'quay.io/openshift-pipeline/s2i:nightly'
+                name: sed
+                script: |
+                  sed 's/libexec/local/' Dockerfile.gen >> Dockerfile.gen2
+                  echo -n "Dockerfile.gen2" > "/tekton/results/DOCKER_FILENAME"
+                workingDir: /workspace/source
+            workspaces:
+              - name: source
+              - name: sslcertdir
+                optional: true
+              - description: An optional workspace that allows providing a .docker/config.json file for Buildah to access the container registry. The file should be placed at the root of the Workspace with name config.json.
+                name: dockerconfig
+                optional: true
+          artifacts: {}
+          provenance:
+            featureFlags:
+              EnableConciseResolverSyntax: false
+              MaxResultSize: 4096
+              AwaitSidecarReadiness: true
+              Coschedule: workspaces
+              ResultExtractionMethod: termination-message
+              EnableParamEnum: false
+              SendCloudEventsForRuns: false
+              EnforceNonfalsifiability: none
+              SetSecurityContext: false
+              DisableCredsInit: false
+              DisableAffinityAssistant: true
+              EnableStepActions: true
+              EnableAPIFields: beta
+              RequireGitSSHSecretKnownHosts: false
+              EnableKubernetesSidecar: false
+              RunningInEnvWithInjectedSidecars: true
+              EnableKeepPodOnCancel: false
+              VerificationNoMatchPolicy: ignore
+              EnableProvenanceInStatus: true
+              DisableInlineSpec: ''
+              EnableArtifacts: false
+              EnableCELInWhenExpression: false
+          steps:
+            - container: step-generate
+              imageID: 'quay.io/openshift-pipeline/s2i@sha256:6c1107bc040ce2b7354c1f101a7e00054bfec754098bd760d846c99dc366662e'
+              name: generate
+              terminated:
+                containerID: 'cri-o://6b12ec20f4025be2b510b28c594dbd32272c837bce1f190efa6247a1f56651d3'
+                exitCode: 0
+                finishedAt: '2025-02-05T09:17:41Z'
+                reason: Completed
+                startedAt: '2025-02-05T09:17:41Z'
+              terminationReason: Completed
+            - container: step-sed
+              imageID: 'quay.io/openshift-pipeline/s2i@sha256:6c1107bc040ce2b7354c1f101a7e00054bfec754098bd760d846c99dc366662e'
+              name: sed
+              terminated:
+                containerID: 'cri-o://e59ca6ab02982c0c3ce245f9fec7e1eb056b36530b54300db367d0d257fb9af7'
+                exitCode: 0
+                finishedAt: '2025-02-05T09:17:41Z'
+                message: '[{"key":"DOCKER_FILENAME","value":"Dockerfile.gen2","type":1}]'
+                reason: Completed
+                startedAt: '2025-02-05T09:17:41Z'
+              terminationReason: Completed
+          completionTime: '2025-02-05T09:17:42Z'
+          startTime: '2025-02-05T09:17:36Z'
+          podName: cargo-build-j3fmsa-s2i-pod
+          results:
+            - name: DOCKER_FILENAME
+              type: string
+              value: Dockerfile.gen2
+          conditions:
+            - lastTransitionTime: '2025-02-05T09:17:42Z'
+              message: All Steps have completed executing
+              reason: Succeeded
+              status: 'True'
+              type: Succeeded
+          duration: 6s
+          reason: Succeeded
+      - name: buildah
+        params:
+          - name: IMAGE
+            value: 'default-route-openshift-image-registry.apps.cluster-5mzhr.5mzhr.sandbox320.opentlc.com/cargo-pipeline/cargo-pipeline:latest'
+          - name: DOCKERFILE
+            value: $(tasks.s2i.results.DOCKER_FILENAME)
+          - name: BUILD_ARGS
+            value:
+              - ''
+          - name: CONTEXT
+            value: .
+          - name: STORAGE_DRIVER
+            value: vfs
+          - name: FORMAT
+            value: oci
+          - name: BUILD_EXTRA_ARGS
+            value: ''
+          - name: PUSH_EXTRA_ARGS
+            value: ''
+          - name: SKIP_PUSH
+            value: 'false'
+          - name: TLS_VERIFY
+            value: 'true'
+          - name: VERBOSE
+            value: 'false'
+        runAfter:
+          - s2i
+        taskRef:
+          params:
+            - name: kind
+              value: task
+            - name: name
+              value: buildah
+            - name: namespace
+              value: openshift-pipelines
+          resolver: cluster
+        workspaces:
+          - name: source
+            workspace: source-code
+          - name: dockerconfig
+            workspace: registry-config
+        status:
+          conditions:
+            - lastTransitionTime: '2025-02-05T09:19:10Z'
+              message: All Steps have completed executing
+              reason: Succeeded
+              status: 'True'
+              type: Succeeded
+          podName: cargo-build-j3fmsa-buildah-pod
+          provenance:
+            featureFlags:
+              EnableConciseResolverSyntax: false
+              MaxResultSize: 4096
+              AwaitSidecarReadiness: true
+              Coschedule: workspaces
+              ResultExtractionMethod: termination-message
+              EnableParamEnum: false
+              SendCloudEventsForRuns: false
+              EnforceNonfalsifiability: none
+              SetSecurityContext: false
+              DisableCredsInit: false
+              DisableAffinityAssistant: true
+              EnableStepActions: true
+              EnableAPIFields: beta
+              RequireGitSSHSecretKnownHosts: false
+              EnableKubernetesSidecar: false
+              RunningInEnvWithInjectedSidecars: true
+              EnableKeepPodOnCancel: false
+              VerificationNoMatchPolicy: ignore
+              EnableProvenanceInStatus: true
+              DisableInlineSpec: ''
+              EnableArtifacts: false
+              EnableCELInWhenExpression: false
+            refSource:
+              digest:
+                sha256: 52f4f99e7247195047eccc5e2537542a10cc672b35410ff8a8ab485785c55a94
+              uri: /apis/tekton.dev/v1/namespaces/openshift-pipelines/task/buildah@f2fef8ee-5818-4a50-9e48-458cc000e004
+          startTime: '2025-02-05T09:17:42Z'
+          steps:
+            - container: step-build
+              imageID: 'registry.redhat.io/rhel8/buildah@sha256:6d2dcb651ba680cf4ec74331f8349dec43d071d420625a1703370acc8d984e9e'
+              name: build
+              running:
+                startedAt: '2025-02-05T09:17:46Z'
+              terminated:
+                containerID: 'cri-o://d899e18b15838fde85b0066f44a57d9b58ac60c070fdbed2ff860c5c61a8b99f'
+                exitCode: 0
+                finishedAt: '2025-02-05T09:19:10Z'
+                message: '[{"key":"IMAGE_DIGEST","value":"sha256:ed08721b88466b21fb3b0f4c6287b1eeb6f4d9b0b9520abab4c074e107c37d0b","type":1},{"key":"IMAGE_URL","value":"default-route-openshift-image-registry.apps.cluster-5mzhr.5mzhr.sandbox320.opentlc.com/cargo-pipeline/cargo-pipeline:latest","type":1}]'
+                reason: Completed
+                startedAt: '2025-02-05T09:17:48Z'
+              terminationReason: Completed
+          taskSpec:
+            description: |
+              Buildah task builds source into a container image and
+              then pushes it to a container registry.
+            params:
+              - description: |
+                  Fully qualified container image name to be built by buildah.
+                name: IMAGE
+                type: string
+              - default: ./Dockerfile
+                description: |
+                  Path to the `Dockerfile` (or `Containerfile`) relative to the `source` workspace.
+                name: DOCKERFILE
+                type: string
+              - default:
+                  - ''
+                description: |
+                  Dockerfile build arguments, array of key=value
+                name: BUILD_ARGS
+                type: array
+              - default: .
+                description: |
+                  Path to the directory to use as context.
+                name: CONTEXT
+                type: string
+              - default: vfs
+                description: |
+                  Set buildah storage driver to reflect the currrent cluster node's
+                  settings.
+                name: STORAGE_DRIVER
+                type: string
+              - default: oci
+                description: 'The format of the built container, oci or docker'
+                name: FORMAT
+                type: string
+              - default: ''
+                description: |
+                  Extra parameters passed for the build command when building images.
+                name: BUILD_EXTRA_ARGS
+                type: string
+              - default: ''
+                description: |
+                  Extra parameters passed for the push command when pushing images.
+                name: PUSH_EXTRA_ARGS
+                type: string
+              - default: 'false'
+                description: |
+                  Skip pushing the image to the container registry.
+                name: SKIP_PUSH
+                type: string
+              - default: 'true'
+                description: |
+                  Sets the TLS verification flag, `true` is recommended.
+                name: TLS_VERIFY
+                type: string
+              - default: 'false'
+                description: |
+                  Turns on verbose logging, all commands executed will be printed out.
+                name: VERBOSE
+                type: string
+            results:
+              - description: |
+                  Fully qualified image name.
+                name: IMAGE_URL
+                type: string
+              - description: |
+                  Digest of the image just built.
+                name: IMAGE_DIGEST
+                type: string
+            stepTemplate:
+              computeResources: {}
+              env:
+                - name: PARAMS_IMAGE
+                  value: 'default-route-openshift-image-registry.apps.cluster-5mzhr.5mzhr.sandbox320.opentlc.com/cargo-pipeline/cargo-pipeline:latest'
+                - name: PARAMS_CONTEXT
+                  value: .
+                - name: PARAMS_DOCKERFILE
+                  value: Dockerfile.gen2
+                - name: PARAMS_FORMAT
+                  value: oci
+                - name: PARAMS_STORAGE_DRIVER
+                  value: vfs
+                - name: PARAMS_BUILD_EXTRA_ARGS
+                - name: PARAMS_PUSH_EXTRA_ARGS
+                - name: PARAMS_SKIP_PUSH
+                  value: 'false'
+                - name: PARAMS_TLS_VERIFY
+                  value: 'true'
+                - name: PARAMS_VERBOSE
+                  value: 'false'
+                - name: WORKSPACES_SOURCE_BOUND
+                  value: 'true'
+                - name: WORKSPACES_SOURCE_PATH
+                  value: /workspace/source
+                - name: WORKSPACES_DOCKERCONFIG_BOUND
+                  value: 'true'
+                - name: WORKSPACES_DOCKERCONFIG_PATH
+                  value: /workspace/dockerconfig
+                - name: WORKSPACES_RHEL_ENTITLEMENT_BOUND
+                  value: 'false'
+                - name: WORKSPACES_RHEL_ENTITLEMENT_PATH
+                - name: RESULTS_IMAGE_URL_PATH
+                  value: /tekton/results/IMAGE_URL
+                - name: RESULTS_IMAGE_DIGEST_PATH
+                  value: /tekton/results/IMAGE_DIGEST
+            steps:
+              - args:
+                  - ''
+                computeResources: {}
+                image: 'registry.redhat.io/rhel8/buildah@sha256:6d2dcb651ba680cf4ec74331f8349dec43d071d420625a1703370acc8d984e9e'
+                name: build
+                script: |
+                  set -e
+                  printf '%s' "IyEvdXNyL2Jpbi9lbnYgYmFzaAojCiMgV3JhcHBlciBhcm91bmQgImJ1aWxkYWggYnVkIiB0byBidWlsZCBhbmQgcHVzaCBhIGNvbnRhaW5lciBpbWFnZSBiYXNlZCBvbiBhIERvY2tlcmZpbGUuCiMKCnNob3B0IC1zIGluaGVyaXRfZXJyZXhpdApzZXQgLWV1IC1vIHBpcGVmYWlsCgpzb3VyY2UgIiQoZGlybmFtZSAke0JBU0hfU09VUkNFWzBdfSkvY29tbW9uLnNoIgpzb3VyY2UgIiQoZGlybmFtZSAke0JBU0hfU09VUkNFWzBdfSkvYnVpbGRhaC1jb21tb24uc2giCgpmdW5jdGlvbiBfYnVpbGRhaCgpIHsKICAgIGJ1aWxkYWggXAogICAgICAgIC0tc3RvcmFnZS1kcml2ZXI9IiR7UEFSQU1TX1NUT1JBR0VfRFJJVkVSfSIgXAogICAgICAgIC0tdGxzLXZlcmlmeT0iJHtQQVJBTVNfVExTX1ZFUklGWX0iIFwKICAgICAgICAkeyp9Cn0KCiMKIyBQcmVwYXJlCiMKCiMgbWFraW5nIHN1cmUgdGhlIHJlcXVpcmVkIHdvcmtzcGFjZSAic291cmNlIiBpcyBib3VuZGVkLCB3aGljaCBtZWFucyBpdHMgdm9sdW1lIGlzIGN1cnJlbnRseSBtb3VudGVkCiMgYW5kIHJlYWR5IHRvIHVzZQpwaGFzZSAiSW5zcGVjdGluZyBzb3VyY2Ugd29ya3NwYWNlICcke1dPUktTUEFDRVNfU09VUkNFX1BBVEh9JyAoUFdEPScke1BXRH0nKSIKW1sgIiR7V09SS1NQQUNFU19TT1VSQ0VfQk9VTkR9IiAhPSAidHJ1ZSIgXV0gJiYKICAgIGZhaWwgIldvcmtzcGFjZSAnc291cmNlJyBpcyBub3QgYm91bmRlZCIKCnBoYXNlICJBc3NlcnRpbmcgdGhlIGRvY2tlcmZpbGUvY29udGFpbmVyZmlsZSAnJHtET0NLRVJGSUxFX0ZVTEx9JyBleGlzdHMiCltbICEgLWYgIiR7RE9DS0VSRklMRV9GVUxMfSIgXV0gJiYKICAgIGZhaWwgIkRvY2tlcmZpbGUgbm90IGZvdW5kIGF0OiAnJHtET0NLRVJGSUxFX0ZVTEx9JyIKCnBoYXNlICJJbnNwZWN0aW5nIGNvbnRleHQgJyR7UEFSQU1TX0NPTlRFWFR9JyIKW1sgISAtZCAiJHtQQVJBTVNfQ09OVEVYVH0iIF1dICYmCiAgICBmYWlsICJDT05URVhUIHBhcmFtIGlzIG5vdCBmb3VuZCBhdCAnJHtQQVJBTVNfQ09OVEVYVH0nLCBvbiBzb3VyY2Ugd29ya3NwYWNlIgoKcGhhc2UgIkJ1aWxkaW5nIGJ1aWxkIGFyZ3MiCkJVSUxEX0FSR1M9KCkKZm9yIGJ1aWxkYXJnIGluICIkQCI7IGRvCiAgICBCVUlMRF9BUkdTKz0oIi0tYnVpbGQtYXJnPSRidWlsZGFyZyIpCmRvbmUKCiMgSGFuZGxlIG9wdGlvbmFsIGRvY2tlcmNvbmZpZyBzZWNyZXQKaWYgW1sgIiR7V09SS1NQQUNFU19ET0NLRVJDT05GSUdfQk9VTkR9IiA9PSAidHJ1ZSIgXV07IHRoZW4KCiAgICAjIGlmIGNvbmZpZy5qc29uIGV4aXN0cyBhdCB3b3Jrc3BhY2Ugcm9vdCwgd2UgdXNlIHRoYXQKICAgIGlmIHRlc3QgLWYgIiR7V09SS1NQQUNFU19ET0NLRVJDT05GSUdfUEFUSH0vY29uZmlnLmpzb24iOyB0aGVuCiAgICAgICAgZXhwb3J0IERPQ0tFUl9DT05GSUc9IiR7V09SS1NQQUNFU19ET0NLRVJDT05GSUdfUEFUSH0iCgogICAgICAgICMgZWxzZSB3ZSBsb29rIGZvciAuZG9ja2VyY29uZmlnanNvbiBhdCB0aGUgcm9vdAogICAgZWxpZiB0ZXN0IC1mICIke1dPUktTUEFDRVNfRE9DS0VSQ09ORklHX1BBVEh9Ly5kb2NrZXJjb25maWdqc29uIjsgdGhlbgogICAgICAgICMgZW5zdXJlIC5kb2NrZXIgZXhpc3QgYmVmb3JlIHRoZSBjb3B5aW5nIHRoZSBjb250ZW50CiAgICAgICAgaWYgWyAhIC1kICIkSE9NRS8uZG9ja2VyIiBdOyB0aGVuCiAgICAgICAgICAgbWtkaXIgLXAgIiRIT01FLy5kb2NrZXIiCiAgICAgICAgZmkKICAgICAgICBjcCAiJHtXT1JLU1BBQ0VTX0RPQ0tFUkNPTkZJR19QQVRIfS8uZG9ja2VyY29uZmlnanNvbiIgIiRIT01FLy5kb2NrZXIvY29uZmlnLmpzb24iCiAgICAgICAgZXhwb3J0IERPQ0tFUl9DT05GSUc9IiRIT01FLy5kb2NrZXIiCgogICAgICAgICMgbmVlZCB0byBlcnJvciBvdXQgaWYgbmVpdGhlciBmaWxlcyBhcmUgcHJlc2VudAogICAgZWxzZQogICAgICAgIGVjaG8gIm5laXRoZXIgJ2NvbmZpZy5qc29uJyBub3IgJy5kb2NrZXJjb25maWdqc29uJyBmb3VuZCBhdCB3b3Jrc3BhY2Ugcm9vdCIKICAgICAgICBleGl0IDEKICAgIGZpCmZpCgpFTlRJVExFTUVOVF9WT0xVTUU9IiIKaWYgW1sgIiR7V09SS1NQQUNFU19SSEVMX0VOVElUTEVNRU5UX0JPVU5EfSIgPT0gInRydWUiIF1dOyB0aGVuCiAgICBFTlRJVExFTUVOVF9WT0xVTUU9Ii0tdm9sdW1lICR7V09SS1NQQUNFU19SSEVMX0VOVElUTEVNRU5UX1BBVEh9Oi9ldGMvcGtpL2VudGl0bGVtZW50OnJvIgpmaQoKIwojIEJ1aWxkCiMKCnBoYXNlICJCdWlsZGluZyAnJHtQQVJBTVNfSU1BR0V9JyBiYXNlZCBvbiAnJHtET0NLRVJGSUxFX0ZVTEx9JyIKCltbIC1uICIke1BBUkFNU19CVUlMRF9FWFRSQV9BUkdTfSIgXV0gJiYKICAgIHBoYXNlICJFeHRyYSAnYnVpbGRhaCBidWQnIGFyZ3VtZW50cyBpbmZvcm1lZDogJyR7UEFSQU1TX0JVSUxEX0VYVFJBX0FSR1N9JyIKCl9idWlsZGFoIGJ1ZCAke1BBUkFNU19CVUlMRF9FWFRSQV9BUkdTfSBcCiAgICAkRU5USVRMRU1FTlRfVk9MVU1FIFwKICAgICIke0JVSUxEX0FSR1NbQF19IiBcCiAgICAtLWZpbGU9IiR7RE9DS0VSRklMRV9GVUxMfSIgXAogICAgLS10YWc9IiR7UEFSQU1TX0lNQUdFfSIgXAogICAgIiR7UEFSQU1TX0NPTlRFWFR9IgoKaWYgW1sgIiR7UEFSQU1TX1NLSVBfUFVTSH0iID09ICJ0cnVlIiBdXTsgdGhlbgogICAgcGhhc2UgIlNraXBwaW5nIHB1c2hpbmcgJyR7UEFSQU1TX0lNQUdFfScgdG8gdGhlIGNvbnRhaW5lciByZWdpc3RyeSEiCiAgICBleGl0IDAKZmkKCiMKIyBQdXNoCiMKCnBoYXNlICJQdXNoaW5nICcke1BBUkFNU19JTUFHRX0nIHRvIHRoZSBjb250YWluZXIgcmVnaXN0cnkiCgpbWyAtbiAiJHtQQVJBTVNfUFVTSF9FWFRSQV9BUkdTfSIgXV0gJiYKICAgIHBoYXNlICJFeHRyYSAnYnVpbGRhaCBidWQnIGFyZ3VtZW50cyBpbmZvcm1lZDogJyR7UEFSQU1TX1BVU0hfRVhUUkFfQVJHU30nIgoKIyB0ZW1wb3JhcnkgZmlsZSB0byBzdG9yZSB0aGUgaW1hZ2UgZGlnZXN0LCBpbmZvcm1hdGlvbiBvbmx5IG9idGFpbmVkIGFmdGVyIHB1c2hpbmcgdGhlIGltYWdlIHRvIHRoZQojIGNvbnRhaW5lciByZWdpc3RyeQpkZWNsYXJlIC1yIGRpZ2VzdF9maWxlPSIvdG1wL2J1aWxkYWgtZGlnZXN0LnR4dCIKCl9idWlsZGFoIHB1c2ggJHtQQVJBTVNfUFVTSF9FWFRSQV9BUkdTfSBcCiAgICAtLWRpZ2VzdGZpbGU9IiR7ZGlnZXN0X2ZpbGV9IiBcCiAgICAiJHtQQVJBTVNfSU1BR0V9IiBcCiAgICAiZG9ja2VyOi8vJHtQQVJBTVNfSU1BR0V9IgoKIwojIFJlc3VsdHMKIwoKcGhhc2UgIkluc3BlY3RpbmcgZGlnZXN0IHJlcG9ydCAoJyR7ZGlnZXN0X2ZpbGV9JykiCgpbWyAhIC1yICIke2RpZ2VzdF9maWxlfSIgXV0gJiYKICAgIGZhaWwgIlVuYWJsZSB0byBmaW5kIGRpZ2VzdC1maWxlIGF0ICcke2RpZ2VzdF9maWxlfSciCgpkZWNsYXJlIC1yIGRpZ2VzdF9zdW09IiQoY2F0ICR7ZGlnZXN0X2ZpbGV9KSIKCltbIC16ICIke2RpZ2VzdF9zdW19IiBdXSAmJgogICAgZmFpbCAiRGlnZXN0IGZpbGUgJyR7ZGlnZXN0X2ZpbGV9JyBpcyBlbXB0eSEiCgpwaGFzZSAiU3VjY2Vzc2Z1bHkgYnVpbHQgY29udGFpbmVyIGltYWdlICcke1BBUkFNU19JTUFHRX0nICgnJHtkaWdlc3Rfc3VtfScpIgplY2hvIC1uICIke1BBUkFNU19JTUFHRX0iIHwgdGVlICR7UkVTVUxUU19JTUFHRV9VUkxfUEFUSH0KZWNobyAtbiAiJHtkaWdlc3Rfc3VtfSIgfCB0ZWUgJHtSRVNVTFRTX0lNQUdFX0RJR0VTVF9QQVRIfQo=" |base64 -d >"/scripts/buildah-bud.sh"
+                  printf '%s' "IyEvdXNyL2Jpbi9lbnYgYmFzaAoKZGVjbGFyZSAtcnggUEFSQU1TX0lNQUdFPSIke1BBUkFNU19JTUFHRTotfSIKZGVjbGFyZSAtcnggUEFSQU1TX0RPQ0tFUkZJTEU9IiR7UEFSQU1TX0RPQ0tFUkZJTEU6LX0iCmRlY2xhcmUgLXggUEFSQU1TX0NPTlRFWFQ9IiR7UEFSQU1TX0NPTlRFWFQ6LX0iCmRlY2xhcmUgLXJ4IFBBUkFNU19TVE9SQUdFX0RSSVZFUj0iJHtQQVJBTVNfU1RPUkFHRV9EUklWRVI6LX0iCmRlY2xhcmUgLXJ4IFBBUkFNU19CVUlMRF9FWFRSQV9BUkdTPSIke1BBUkFNU19CVUlMRF9FWFRSQV9BUkdTOi19IgpkZWNsYXJlIC1yeCBQQVJBTVNfUFVTSF9FWFRSQV9BUkdTPSIke1BBUkFNU19QVVNIX0VYVFJBX0FSR1M6LX0iCmRlY2xhcmUgLXJ4IFBBUkFNU19TS0lQX1BVU0g9IiR7UEFSQU1TX1NLSVBfUFVTSDotfSIKZGVjbGFyZSAtcnggUEFSQU1TX1RMU19WRVJJRlk9IiR7UEFSQU1TX1RMU19WRVJJRlk6LX0iCmRlY2xhcmUgLXJ4IFBBUkFNU19WRVJCT1NFPSIke1BBUkFNU19WRVJCT1NFOi19IgoKZGVjbGFyZSAtcnggV09SS1NQQUNFU19TT1VSQ0VfUEFUSD0iJHtXT1JLU1BBQ0VTX1NPVVJDRV9QQVRIOi19IgpkZWNsYXJlIC1yeCBXT1JLU1BBQ0VTX1NPVVJDRV9CT1VORD0iJHtXT1JLU1BBQ0VTX1NPVVJDRV9CT1VORDotfSIKZGVjbGFyZSAtcnggV09SS1NQQUNFU19ET0NLRVJDT05GSUdfUEFUSD0iJHtXT1JLU1BBQ0VTX0RPQ0tFUkNPTkZJR19QQVRIOi19IgpkZWNsYXJlIC1yeCBXT1JLU1BBQ0VTX0RPQ0tFUkNPTkZJR19CT1VORD0iJHtXT1JLU1BBQ0VTX0RPQ0tFUkNPTkZJR19CT1VORDotfSIKZGVjbGFyZSAtcnggV09SS1NQQUNFU19SSEVMX0VOVElUTEVNRU5UX1BBVEg9IiR7V09SS1NQQUNFU19SSEVMX0VOVElUTEVNRU5UX1BBVEg6LX0iCmRlY2xhcmUgLXJ4IFdPUktTUEFDRVNfUkhFTF9FTlRJVExFTUVOVF9CT1VORD0iJHtXT1JLU1BBQ0VTX1JIRUxfRU5USVRMRU1FTlRfQk9VTkQ6LX0iCgpkZWNsYXJlIC1yeCBSRVNVTFRTX0lNQUdFX0RJR0VTVF9QQVRIPSIke1JFU1VMVFNfSU1BR0VfRElHRVNUX1BBVEg6LX0iCmRlY2xhcmUgLXJ4IFJFU1VMVFNfSU1BR0VfVVJMX1BBVEg9IiR7UkVTVUxUU19JTUFHRV9VUkxfUEFUSDotfSIKCiMKIyBEb2NrZXJmaWxlCiMKCiMgZXhwb3NpbmcgdGhlIGZ1bGwgcGF0aCB0byB0aGUgY29udGFpbmVyIGZpbGUsIHdoaWNoIGJ5IGRlZmF1bHQgc2hvdWxkIGJlIHJlbGF0aXZlIHRvIHRoZSBwcmltYXJ5CiMgd29ya3NwYWNlLCB0byByZWNlaXZlIGEgZGlmZmVyZW50IGNvbnRhaW5lci1maWxlIGxvY2F0aW9uCmRlY2xhcmUgLXIgZG9ja2VyZmlsZV9vbl93cz0iJHtXT1JLU1BBQ0VTX1NPVVJDRV9QQVRIfS8ke1BBUkFNU19ET0NLRVJGSUxFfSIKZGVjbGFyZSAteCBET0NLRVJGSUxFX0ZVTEw9IiR7RE9DS0VSRklMRV9GVUxMOi0ke2RvY2tlcmZpbGVfb25fd3N9fSIKCiMKIyBBc3NlcnRpbmcgRW52aXJvbm1lbnQKIwoKW1sgLXogIiR7RE9DS0VSRklMRV9GVUxMfSIgXV0gJiYKICAgIGZhaWwgInVuYWJsZSB0byBmaW5kIHRoZSBEb2NrZXJmaWxlLCBET0NLRVJGSUxFIG1heSBoYXZlIGFuIGluY29ycmVjdCBsb2NhdGlvbiIKCmV4cG9ydGVkX29yX2ZhaWwgXAogICAgV09SS1NQQUNFU19TT1VSQ0VfUEFUSCBcCiAgICBQQVJBTVNfSU1BR0UKCiMKIyBWZXJib3NlIE91dHB1dAojCgppZiBbWyAiJHtQQVJBTVNfVkVSQk9TRX0iID09ICJ0cnVlIiBdXTsgdGhlbgogICAgc2V0IC14CmZpCg==" |base64 -d >"/scripts/buildah-common.sh"
+                  printf '%s' "IyEvdXNyL2Jpbi9lbnYgYmFzaAoKIyB0ZWt0b24ncyBob21lIGRpcmVjdG9yeQpkZWNsYXJlIC1yeCBURUtUT05fSE9NRT0iJHtURUtUT05fSE9NRTotL3Rla3Rvbi9ob21lfSIKCiMKIyBGdW5jdGlvbnMKIwoKZnVuY3Rpb24gZmFpbCgpIHsKICAgIGVjaG8gIkVSUk9SOiAkeyp9IiAyPiYxCiAgICBleGl0IDEKfQoKZnVuY3Rpb24gcGhhc2UoKSB7CiAgICBlY2hvICItLS0+IFBoYXNlOiAkeyp9Li4uIgp9CgojIGFzc2VydCBsb2NhbCB2YXJpYWJsZXMgYXJlIGV4cG9ydGVkIG9uIHRoZSBlbnZpcm9ubWVudApmdW5jdGlvbiBleHBvcnRlZF9vcl9mYWlsKCkgewogICAgZGVjbGFyZSAtYSBfcmVxdWlyZWRfdmFycz0iJHtAfSIKCiAgICBmb3IgdiBpbiAke19yZXF1aXJlZF92YXJzW0BdfTsgZG8KICAgICAgICBbWyAteiAiJHshdn0iIF1dICYmCiAgICAgICAgICAgIGZhaWwgIicke3Z9JyBlbnZpcm9ubWVudCB2YXJpYWJsZSBpcyBub3Qgc2V0ISIKICAgIGRvbmUKCiAgICByZXR1cm4gMAp9Cg==" |base64 -d >"/scripts/common.sh"
+                  ls /scripts/buildah-*.sh;
+                  chmod +x /scripts/buildah-*.sh;echo "Running Script /scripts/buildah-bud.sh";
+                    /scripts/buildah-bud.sh;
+                securityContext:
+                  capabilities:
+                    add:
+                      - SETFCAP
+                volumeMounts:
+                  - mountPath: /scripts
+                    name: scripts-dir
+                workingDir: /workspace/source
+            volumes:
+              - emptyDir: {}
+                name: scripts-dir
+            workspaces:
+              - description: |
+                  Container build context, like for instnace a application source code
+                  followed by a `Dockerfile`.
+                name: source
+              - description: An optional workspace that allows providing a .docker/config.json file for Buildah to access the container registry. The file should be placed at the root of the Workspace with name config.json or .dockerconfigjson.
+                name: dockerconfig
+                optional: true
+              - description: An optional workspace that allows providing the entitlement keys for Buildah to access subscription. The mounted workspace contains entitlement.pem and entitlement-key.pem.
+                mountPath: /tmp/entitlement
+                name: rhel-entitlement
+                optional: true
+          reason: Succeeded
+          artifacts: {}
+          completionTime: '2025-02-05T09:19:10Z'
+          results:
+            - name: IMAGE_DIGEST
+              type: string
+              value: 'sha256:ed08721b88466b21fb3b0f4c6287b1eeb6f4d9b0b9520abab4c074e107c37d0b'
+            - name: IMAGE_URL
+              type: string
+              value: 'default-route-openshift-image-registry.apps.cluster-5mzhr.5mzhr.sandbox320.opentlc.com/cargo-pipeline/cargo-pipeline:latest'
+          duration: 1m 28s
+    workspaces:
+      - name: source-code
+      - name: registry-config
+  provenance:
+    featureFlags:
+      EnableConciseResolverSyntax: false
+      MaxResultSize: 4096
+      AwaitSidecarReadiness: true
+      Coschedule: workspaces
+      ResultExtractionMethod: termination-message
+      EnableParamEnum: false
+      SendCloudEventsForRuns: false
+      EnforceNonfalsifiability: none
+      SetSecurityContext: false
+      DisableCredsInit: false
+      DisableAffinityAssistant: true
+      EnableStepActions: true
+      EnableAPIFields: beta
+      RequireGitSSHSecretKnownHosts: false
+      EnableKubernetesSidecar: false
+      RunningInEnvWithInjectedSidecars: true
+      EnableKeepPodOnCancel: false
+      VerificationNoMatchPolicy: ignore
+      EnableProvenanceInStatus: true
+      DisableInlineSpec: ''
+      EnableArtifacts: false
+      EnableCELInWhenExpression: false

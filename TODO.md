@@ -11,7 +11,8 @@ Backlog v0
 *   MTA
 *   Instructions EAP7 and EAP8
 *   \-------
-*   Tekton
+*   Tekton with GitOps
+*   Explain Galeon (Dockerfile)
 *   Use of the JEE 7 glassfish app on OCP
     *   SCC security on Openshift
     *   ID and permission for volume writing and sharing (fsgroup…)  --cargo-config.md

@@ -1,0 +1,151 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  creationTimestamp: '2025-01-29T12:38:35Z'
+  generation: 13
+  managedFields:
+    - apiVersion: tekton.dev/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          .: {}
+          'f:finally': {}
+          'f:params': {}
+          'f:tasks': {}
+          'f:workspaces': {}
+      manager: Mozilla
+      operation: Update
+      time: '2025-02-04T13:38:05Z'
+  name: cargo-build
+  namespace: cargo-pipeline
+  resourceVersion: '2841987'
+  uid: f598b8c3-ec8c-448a-9321-bbf163ce90e0
+spec:
+  tasks:
+    - name: git-clone
+      params:
+        - name: url
+          value: 'https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker'
+        - name: revision
+          value: jee7-eap7
+        - name: refspec
+          value: ''
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: crtFileName
+          value: ca-bundle.crt
+        - name: subdirectory
+          value: ''
+        - name: sparseCheckoutDirectories
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: httpProxy
+          value: ''
+        - name: httpsProxy
+          value: ''
+        - name: noProxy
+          value: ''
+        - name: verbose
+          value: 'true'
+        - name: gitInitImage
+          value: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2'
+        - name: userHome
+          value: /home/git
+      taskRef:
+        kind: Task
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: source-code
+    - name: maven
+      params:
+        - name: GOALS
+          value:
+            - package
+        - name: MAVEN_MIRROR_URL
+          value: ''
+        - name: SUBDIRECTORY
+          value: .
+      runAfter:
+        - git-clone
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: maven
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: source
+          workspace: source-code
+    - name: s2i
+      params:
+        - name: BUILDER_IMAGE
+          value: registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8
+        - name: IMAGE
+          value: cargo-app-pipeline
+        - name: PATH_CONTEXT
+          value: ./target
+        - name: LOGLEVEL
+          value: '0'
+      runAfter:
+        - maven
+      taskRef:
+        kind: Task
+        name: cargo-s2i
+      workspaces:
+        - name: source
+          workspace: source-code
+        - name: dockerconfig
+          workspace: registry-config
+    - name: buildah
+      params:
+        - name: IMAGE
+          value: 'default-route-openshift-image-registry.apps.$OPENSHIFT_DOMAIN/<namespace-dev>/cargo-pipeline:latest'
+        - name: DOCKERFILE
+          value: $(tasks.cargo-s2i.results.DOCKER_FILENAME)
+        - name: BUILD_ARGS
+          value:
+            - ''
+        - name: CONTEXT
+          value: .
+        - name: STORAGE_DRIVER
+          value: vfs
+        - name: FORMAT
+          value: oci
+        - name: BUILD_EXTRA_ARGS
+          value: ''
+        - name: PUSH_EXTRA_ARGS
+          value: ''
+        - name: SKIP_PUSH
+          value: 'false'
+        - name: TLS_VERIFY
+          value: 'true'
+        - name: VERBOSE
+          value: 'false'
+      runAfter:
+        - s2i
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: buildah
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: source
+          workspace: source-code
+        - name: dockerconfig
+          workspace: registry-config
+  workspaces:
+    - name: source-code
+    - name: registry-config

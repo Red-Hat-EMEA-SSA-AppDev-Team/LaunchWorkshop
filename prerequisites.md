@@ -9,7 +9,7 @@ Local
 Openshift
 
 *   Access by dev and ops
-*   Namespaces and users created
+*   Users created + 3 namespaces per user (dev-test-prod)
 *   Generic user with registry-editor right
 *   One cluster-administrator user (for Red Hat)
 *   One platform engineer user (acces to EAP, Pipelines and Gitops CRDs + namesapce creation)

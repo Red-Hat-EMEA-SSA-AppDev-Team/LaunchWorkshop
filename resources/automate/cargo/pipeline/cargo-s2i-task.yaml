@@ -7,9 +7,9 @@ metadata:
     tekton.dev/pipelines.minVersion: 0.17.0
     tekton.dev/platforms: linux/amd64
     tekton.dev/tags: image-build
+  name: cargo-s2i
   labels:
     app.kubernetes.io/version: '0.3'
-  name: cargo-s2i
 spec:
   description: |-
     Source-to-Image (S2I) is a toolkit and workflow for building reproducible container images from source code
@@ -33,6 +33,8 @@ spec:
     - description: Digest of the image just built.
       name: IMAGE_DIGEST
       type: string
+    - name: DOCKER_FILENAME
+      description: name of the generated Docker file
   steps:
     - command:
         - /usr/local/bin/s2i
@@ -46,11 +48,14 @@ spec:
       image: 'quay.io/openshift-pipeline/s2i:nightly'
       name: generate
       workingDir: $(workspaces.source.path)
+    - computeResources: {}
+      image: 'quay.io/openshift-pipeline/s2i:nightly'
+      name: sed
+      script: |
+        sed 's/libexec/local/' Dockerfile.gen >> Dockerfile.gen2
+        echo -n "Dockerfile.gen2" > "$(results.DOCKER_FILENAME.path)"
+      workingDir: $(workspaces.source.path)
   workspaces:
     - name: source
     - name: sslcertdir
       optional: true
-    - description: An optional workspace that allows providing a .docker/config.json file for Buildah to access the container registry. The file should be placed at the root of the Workspace with name config.json.
-      name: dockerconfig
-      optional: true
-
