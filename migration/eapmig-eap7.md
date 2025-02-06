@@ -49,8 +49,8 @@ Reference in `web.xml`:
    <deployment>
        <dependencies>
            <!-- <module name="org.apache.derby" /> -->
-           <module name="com.h2database.h2" />
-       </dependencies>
+           <module name="com.h2database.h2">
+       </module></dependencies>
    </deployment>
 </jboss-deployment-structure>
 ```
@@ -96,7 +96,3 @@ Enabling lazy loading out of transactional session: src/main/resources/META-INF/
 ```xml
 <property name="hibernate.enable_lazy_load_no_trans" value="true">
 ```
-
-### Note: Payara upgrade
-
-Notice that the Payara maven configuration was updated and the JEE7 version of the application can run on the same code base on a jdk 11

@@ -16,6 +16,7 @@ FROM registry.redhat.io/jboss-eap-8/eap8-openjdk17-runtime-openshift-rhel8:lates
 COPY --from=builder --chown=jboss:root $JBOSS_HOME $JBOSS_HOME
 
 COPY --chown=jboss:root deployments/*.war $JBOSS_HOME/standalone/deployments
+
 RUN $JBOSS_HOME/bin/jboss-cli.sh --commands="embed-server,/subsystem=ee:write-attribute(name=spec-descriptor-property-replacement,value=true)"
 RUN $JBOSS_HOME/bin/jboss-cli.sh --commands="embed-server,/subsystem=ee/service=default-bindings:write-attribute(name=datasource,value=java:/jdbc/CargoTrackerDatabase)"
 RUN chmod -R ug+rwX $JBOSS_HOME

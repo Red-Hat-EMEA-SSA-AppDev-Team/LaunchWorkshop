@@ -65,3 +65,25 @@ Then, open a web bowser to http://localhost:8080/cargo-tracker
 ### Running the Cargo Tracker EAP 7 application on Openshift
 
 Let's start [exploring the Openshift's Build and Deployment process for the CargoTracker application.](cargo-build.md)
+
+### Note
+
+#### EAP 8 migration
+
+This workshop also contains a section exploring how to migrate the Cargo Tracker application from EAP 7.4 to EAP 8.0.
+
+#### Payara upgrade
+
+Along the migration journey to EAP7 then EAP8, the Payara server, through the maven configuration, was updated to make the Cargo Tracker application back-compatible with Payara.
+
+```plaintext
+Cargo Tracker EE7  → Payara 4.1.2.181 (jdk 8)
+Cargo Tracker EAP7 → Payara 5.2022.5 (jdk 11)
+Cargo Tracker EAP8 → Payara 6.2023.12
+```
+
+#### Microservices and modernization
+
+This workshop also contains a section to explore the modernization of legacy applications (like database and messaging system migration) as well as a microservices breakdown strategy.
+
+[Modernizing legacy JEE workload](../migration/eapmig-modernition.md)
