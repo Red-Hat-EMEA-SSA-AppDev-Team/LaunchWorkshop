@@ -29,5 +29,3 @@ This workshop's section will demonstrate how to take an existing Java EE7 legacy
 [Automating the Inner Loop with pipelines](cargo-pipelines.md)
 
 [Deploying the GitOps way](cargo-gitops.md)
-
-[Outer Loop with Pipelines and GitOps](cargo-fullsdlc.md)

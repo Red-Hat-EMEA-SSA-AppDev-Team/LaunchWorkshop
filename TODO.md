@@ -9,10 +9,11 @@ Backlog v0
 
 *   Centralized logging (Loki)
 *   MTA
+*   \----------------------------
 *   Instructions EAP7 and EAP8
+    *   Explain Galeon (Dockerfile)
+    *   Explain XP
 *   \-------
-*   Tekton with GitOps
-*   Explain Galeon (Dockerfile)
 *   Use of the JEE 7 glassfish app on OCP
     *   SCC security on Openshift
     *   ID and permission for volume writing and sharing (fsgroup…)  --cargo-config.md
@@ -55,7 +56,8 @@ FollowUp workshop
 \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
 *   DevOps organization
-*   GitOps best practice
+*   GitOps & automation
+*   Day 2
 
 \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 

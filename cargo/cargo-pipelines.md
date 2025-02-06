@@ -71,7 +71,7 @@ Set the dockerfile parameter to
 For the target image, use :
 
 ```plaintext
-default-route-openshift-image-registry.apps.$OPENSHIFT_DOMAIN/<namespace-dev>/cargo-pipeline:latest
+default-route-openshift-image-registry.apps.$OPENSHIFT_DOMAIN/cargo-dev-<user>/cargo-pipeline:latest
 ```
 
 Save the pipeline.
@@ -106,7 +106,7 @@ Add the ‘openshift-client' task after the buidah task.
 In the command, type: 
 
 ```plaintext
-oc new-app cargo-pipeline:latest -n <namespace-dev>
+oc new-app cargo-pipeline:latest -n cargo-dev-<user>
 ```
 
 ### Promoting applications
@@ -124,7 +124,7 @@ Let's harcode v1 here, but in theory the target version would be a parameter of 
 The "Inner loop" pipeline was created in the “development” environment and created artifacts in that environment so it didn't require any adjustment in the permissions.  The promotion step involves at least 2 environments, and the “test” one is remote to the pipeline.  Openshift  requires that explicit permissions are set for Service Account to perfom actions in remote namespaces.
 
 ```plaintext
-oc adm policy add-role-to-user edit system:serviceaccount:cargo-pipeline:pipeline -n <namespace-test>
+oc adm policy add-role-to-user edit system:serviceaccount:cargo-pipeline:pipeline -n cargo-test-<user>
 ```
 
 #### Promotion pipeline
@@ -134,7 +134,7 @@ Create a new pipeline, named cargo-promote.
 Add an “openshift-client” task and set the command to :
 
 ```plaintext
-oc tag <namespace-dev>/cargo-pipeline:latest <namespace-test>/cargo-pipeline:v1
+oc tag cargo-dev-<user>/cargo-pipeline:latest cargo-test-<user>/cargo-pipeline:v1
 ```
 
 Now that the image exists in the “test” environment, the pipeline can deploy it there, for instance using again the "oc new-app" command.
@@ -142,13 +142,13 @@ Now that the image exists in the “test” environment, the pipeline can deploy
 Add another “openshift-client” task and set the command to : 
 
 ```plaintext
-oc new-app cargo-pipeline:v1 -n <namespace-test>
+oc new-app cargo-pipeline:v1 -n cargo-test-<user>
 ```
 
 Run the pipeline and check that pods are created in the target namespace:
 
 ```plaintext
-oc get pods -n <namespace-test>
+oc get pods -n cargo-test-<user>
 ```
 
 ## Creating pipelines with Yaml

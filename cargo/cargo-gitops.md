@@ -1,4 +1,4 @@
-## Release management with the Gitops model
+## Using a GitOps approach
 
 [Introduction to Openshift GitOps and ArgoCD](../ocp/ocp-gitops.md)
 
@@ -21,7 +21,7 @@ We're going to simulate the deployment of the Cargo Tracker application in 2 dif
 A Kustomize-ready example has been deploy to the Git repo:
 
 ```plaintext
-<url_without_user_suffix>
+<url_without_user_suffix>/gitops-<user>
 ```
 
 #### Configuring ArgoCD Applications
@@ -33,13 +33,13 @@ Let's first complete the setup of ArgoCD:
 *   Create the namespaces for the users
 
 ```plaintext
-oc process -f resources/automate/cargo/argo/argo-namespaces.yaml -p USER=user1 | oc apply -f -
+oc process -f resources/automate/cargo/argo/argo-namespaces.yaml -p USER=<user> | oc apply -f -
 ```
 
 *   Allow ArgoCD to edit those namespaces
 
 ```plaintext
-oc process -f resources/automate/cargo/argo/argo-roles.yaml -p USER=user1 | oc apply -f -
+oc process -f resources/automate/cargo/argo/argo-roles.yaml -p USER=<user> | oc apply -f -
 ```
 
 Alternatively:
@@ -64,27 +64,27 @@ On the main page, click on the "+NewApp"
 Provide the following information
 
 ```plaintext
-Application Name: cargo-dev-<your_user>
+Application Name: cargo-dev-<user>
 Project Name: default
 
-SOURCE repository URL: <url_without_user_suffix>
-SOURCE path: <your_user>/dev/overlays
+SOURCE repository URL: <url_without_user_suffix>/gitops-<user>
+SOURCE path: <user>/dev/overlays
 
 DESTINATION cluster URL:https://kubernetes.default.svc
-DESTINATION namespace: cargo-dev-<your_user>
+DESTINATION namespace: cargo-dev-<user>
 ```
 
 Do the same for the second “environment”
 
 ```plaintext
-Application Name: cargo-prod-<your_user>
+Application Name: cargo-prod-<user>
 Project Name: default
 
-SOURCE repository URL: <url_without_user_suffix>
-SOURCE path: <your_user>/prod/overlays
+SOURCE repository URL: <url_without_user_suffix>/gitops-<user>
+SOURCE path: <user>/prod/overlays
 
 DESTINATION cluster URL:https://kubernetes.default.svc
-DESTINATION namespace: cargo-prod-<your_user>
+DESTINATION namespace: cargo-prod-<user>
 ```
 
 _**ArgoCD  Applications using the Operator**_
@@ -100,26 +100,26 @@ Select the Application tab and click "Create"
 Provide the following instructions to the form:
 
 ```plaintext
-name: cargo-dev-<your_user>
+name: cargo-dev-<user>
 destination:
-  namespace: cargo-dev-<your_user>
+  namespace: cargo-dev-<user>
   server: https://kubernetes.default.svc
 project: default
 source:
-  path: <your_user>/dev/overlays
+  path: <user>/dev/overlays
   repoURL: <url_without_user_suffix>
 ```
 
 Do the same for the second “environment”.
 
 ```plaintext
-name: cargo-prod-<your_user>
+name: cargo-prod-<user>
 destination:
-  namespace: cargo-prod-<your_user>
+  namespace: cargo-prod-<user>
   server: https://kubernetes.default.svc
 project: default
 source:
-  path: <your_user>/prod/overlays
+  path: <user>/prod/overlays
   repoURL: <url_without_user_suffix>
 ```
 
@@ -137,7 +137,7 @@ Now is the turn of the Developers, to push changes to the Gith repository.
 
 ```plaintext
 cd /tmp
-git clone <url_without_user_suffix>/<user>
+git clone <url_without_user_suffix>/gitops-<user>
 cd <user>
 cp $/resources/automate/cargo/kustomize/dev/base/cargo-*.yaml  dev/base/
 git add . --all
@@ -196,7 +196,7 @@ Refresh the Application in the ArgoCD UI.  ArgoCD should discover the 3 new res
 Proceed with the synchronization of the Deployment and look at the pods created in the cargo-prod-\<user> namespace.
 
 ```plaintext
-oc get pods -n cargo-prod-<user1>
+oc get pods -n cargo-prod-<user>
 ```
 
 You'll see that there are 2 pods created.  This is what the Kustomize overlays feature is for.  It allows to modify parts of a yaml from an environment to another.
@@ -233,20 +233,13 @@ spec:
 
 If you are more familiar with Helm, you can use Helm instead of Kustomize as the packaging format for the files in the Git source of ArgoCD.
 
-You can find an example already prepared with a dev helm chart in the same repository, under dev/helm and prod/helm.
-
-To synchronize this one:
-
-*   delete what is in the Openshift dev project, by removing the Kustomize files from the GIT repository (or by altering the kustomize.yaml file):
+You can find an example already prepared with a dev helm chart in the Git repo:
 
 ```plaintext
-cd /tmp/<user>
-rm dev/base/cargo*.yaml
-git add . --all
-git commit -m "remove dev application"
-git push origin main
-<user> openshift
+<url_without_user_suffix>/helm-<user>
 ```
+
+To synchronize this one:
 
 *   Remove the ArgoCD application, either from the ArgoCD UI, the Openshift Operator,  or the command line:
 
@@ -254,6 +247,90 @@ git push origin main
 oc delete applications.argoproj.io cargo-dev-<user> -n openshift-gitops
 ```
 
-Edit the ArgoCD application in the ArgoCD UI, now specifying “dev/cargo-dev-helm” as the path directory within the source.
+*   delete the objects created by ArgoCD
 
-You'll see that the number of pod created is now 3, which comes from the Helm's value file.
+```plaintext
+oc delete all -l app=cargo-app-gitops
+```
+
+Create an ArgoCD application in the ArgoCD UI, now specifying “dev/cargo-dev-helm” as the path directory within the source code repository.
+
+You'll see that the number of pod created is now 3, which comes from the Helm's Values file.
+
+## Full Application lifecycle
+
+We proceeded with "GIT push" commands.  When GitOps is operated manually, it's highly recommended, for security reasons, to proceed with pull-requests.
+
+But the lifecycle can also be fully automated with a pipeline making modification in a GIT repository that ArgoCD will synchronize.
+
+Ideally the deployment artifacts would be prepared and stored as part of the source code, and the pipeline will propagate those yaml files from one directory to another within the AgoCD GIT repository, setting some of the parameters, such as the image tag and the number of replicas, dynamically.
+
+Let's reuse the \<url\_without\_user\_suffix>/helm-\<user> repository.
+
+Using the ArgoCD UI, create an ArgoCD Application that synchronize a “pipeline/cargo-gitops-dev-pipeline” subdirectory within this repository with the cargo-test-\<user> environment.
+
+We're going to create a pipeline with the following tasks:
+
+*   git-clone : clone the source code of the application in a subdirectory of the workspace
+*   git-clone :  clone the gitops helm repository in a subdirectory of the workspace
+*   generic shell : this is a custom task that we'll create, and that will be used to copy openshift deployment files from the source code to the gitops repository
+*   git-cli : to perform a commit and push in the gitops repository
+
+Let's first create our generic shell task:
+
+```plaintext
+oc apply -f $/resources/automate/cargo/pipeline/shell-task.yaml
+```
+
+Let's also create a new PVC, named "source-code-gitops-pvc" to materialize the workspace.
+
+The "git push" action will require authentication.  We can use the “basic auth” directory of the task, that expects a .git-credentials file.
+
+We can create the Secret with the following command, then update the username, password and hostname fields accordingly with the UI:
+
+```plaintext
+oc apply -f $/resources/automate/cargo/pipeline/git-basic-auth-secret.yaml
+```
+
+Let's then create the pipeline.
+
+We can begin by creating the 2 workspaces: source-code-gitops and git-basic-auth-secret
+
+For the first git-clone task, we'll link the source-code-gitops workspace to the "output" folder and set:
+
+```plaintext
+url = https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker
+revision = jee7-eap7
+subdirectory = app
+```
+
+For the second git-clone task, we'll link the source-code-gitops workspace to the “output” folder and set:
+
+```plaintext
+url = <url_without_user_suffix>/helm-<user>
+subdirectory = gitops
+```
+
+For the shell task, we'll link the source-code-gitops workspace to the “source” folder and use the command : 
+
+```plaintext
+cp workspace/source/app/openshift/*.yaml workspace/source/gitops/pipeline/cargo-gitops-pipeline-helm/templates/
+```
+
+Then, for the git-cli, we'll link the source-code-gitops workspace to the “source” folder as well as the git-basic-auth-secret Secret to the “basic-auth” folder.
+
+Then, for the GIT SCRIPT parameter:
+
+```plaintext
+cd /workspace/source/gitops && git add pipeline --all && git commit -m "pipeline commit" && git push origin HEAD:main
+```
+
+DONT FORGET TO SET THE “DELETE EXISTING” PARAMETER TO FALSE.
+
+Let's start the pipeline, linking the source-code-gitops-pvc and the git-push-secret Secret to the workspaces.
+
+Check that the pipeline wrote to the Git repository, that the ArgoCD server picked up the changes, and that pods have been created in the cargo-test-\<user> namespace.
+
+```plaintext
+oc get pods -n cargo-test-<user> 
+```

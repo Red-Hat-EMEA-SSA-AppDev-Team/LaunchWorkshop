@@ -5,6 +5,7 @@ metadata:
     app.kubernetes.io/version: "7.4"
     app.openshift.io/runtime: eap
     com.company: Red_Hat
+    app: cargo-app-gitops
   name: cargo-app-bc-source-gitops
 spec:
   failedBuildsHistoryLimit: 5

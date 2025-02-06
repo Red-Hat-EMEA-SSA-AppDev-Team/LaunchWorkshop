@@ -8,20 +8,23 @@ Local
 
 Openshift
 
-*   Access by dev and ops
-*   Users created + 3 namespaces per user (dev-test-prod)
-*   Generic user with registry-editor right
-*   One cluster-administrator user (for Red Hat)
-*   One platform engineer user (acces to EAP, Pipelines and Gitops CRDs + namesapce creation)
+*   Access to the OCP cluster by dev and ops from a networking point of view
+*   Users created 
+    *   3 namespaces per user (cargo-dev\<user>, cargo-test-\<user> and cargo-prod-\<user>)
+*   Generic system user with registry-editor right
+*   One cluster-admin user for Red Hat, with the aggreement of the customer, or a cluster-admin person in the room
+*   One platform engineer user account (with acces to CRDs such as EAP, Pipelines and Gitops + ability to create namespaces)
 *   EAP Operator installed
-*   Pipelines and GitOps operators installed (+GitOps fixes)
+*   Pipelines and GitOps operators installed (+ArgoCD access fixes)
 
 Us
 
 *   An open environment with MTA installed
-*   An open environment with Gitea setup
-    *   One repo for each user (named as user + pswd = 'openshift')
-*   Create a gitea server for GitOps with one repo per user → adapt argocd Apps
+*   An open environment with Gitea setup with Route access
+    *   2 repos per user (named as user + pswd = 'openshift')
+        *   Repo for kustomize (/gitops-\<user>)
+        *   Repo for Helm (/helm-\<user>) 
+            *   “pipeline” subdirectory with empty helm chart for the gitops pipeline example
 
 Choices
 

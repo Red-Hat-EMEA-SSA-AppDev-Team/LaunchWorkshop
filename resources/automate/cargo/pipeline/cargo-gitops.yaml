@@ -1,0 +1,145 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: cargo-gitops
+spec:
+  tasks:
+    - name: git-clone1
+      params:
+        - name: url
+          value: 'https://github.com/mthirion/cargo-helm'
+        - name: revision
+          value: main
+        - name: refspec
+          value: ''
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: crtFileName
+          value: ca-bundle.crt
+        - name: subdirectory
+          value: gitops
+        - name: sparseCheckoutDirectories
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: httpProxy
+          value: ''
+        - name: httpsProxy
+          value: ''
+        - name: noProxy
+          value: ''
+        - name: verbose
+          value: 'true'
+        - name: gitInitImage
+          value: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2'
+        - name: userHome
+          value: /home/git
+      taskRef:
+        kind: Task
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: source-code-gitops
+    - name: git-clone2
+      params:
+        - name: url
+          value: 'https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker'
+        - name: revision
+          value: jee7-eap7
+        - name: refspec
+          value: ''
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: crtFileName
+          value: ca-bundle.crt
+        - name: subdirectory
+          value: app
+        - name: sparseCheckoutDirectories
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: httpProxy
+          value: ''
+        - name: httpsProxy
+          value: ''
+        - name: noProxy
+          value: ''
+        - name: verbose
+          value: 'true'
+        - name: gitInitImage
+          value: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2'
+        - name: userHome
+          value: /home/git
+      runAfter:
+        - git-clone1
+      taskRef:
+        kind: Task
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: source-code-gitops
+    - name: shell
+      params:
+        - name: COMMAND
+          value: cp workspace/source/app/openshift/*.yaml workspace/source/gitops/pipeline/cargo-gitops-pipeline-helm/templates/
+      runAfter:
+        - git-clone2
+      taskRef:
+        kind: Task
+        name: shell
+      workspaces:
+        - name: source
+          workspace: source-code-gitops
+    - name: git-cli
+      params:
+        - name: CRT_FILENAME
+          value: ca-bundle.crt
+        - name: HTTP_PROXY
+          value: ''
+        - name: HTTPS_PROXY
+          value: ''
+        - name: NO_PROXY
+          value: ''
+        - name: SUBDIRECTORY
+          value: ''
+        - name: USER_HOME
+          value: /home/git
+        - name: DELETE_EXISTING
+          value: 'false'
+        - name: VERBOSE
+          value: 'false'
+        - name: SSL_VERIFY
+          value: 'true'
+        - name: GIT_USER_NAME
+          value: 'user'
+        - name: GIT_USER_EMAIL
+          value: test@dummy.com
+        - name: GIT_SCRIPT
+          value: 'cd /workspace/source/gitops && git add pipeline --all && git commit -m "pipeline commit" && git push origin HEAD:main'
+      runAfter:
+        - shell
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-cli
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: basic-auth
+          workspace: git-basic-auth-secret
+        - name: source
+          workspace: source-code-gitops
+  workspaces:
+    - name: source-code-gitops
+    - name: git-basic-auth-secret

@@ -1,25 +1,7 @@
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  creationTimestamp: '2025-01-29T12:38:35Z'
-  generation: 13
-  managedFields:
-    - apiVersion: tekton.dev/v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        'f:spec':
-          .: {}
-          'f:finally': {}
-          'f:params': {}
-          'f:tasks': {}
-          'f:workspaces': {}
-      manager: Mozilla
-      operation: Update
-      time: '2025-02-04T13:38:05Z'
-  name: cargo-build
-  namespace: cargo-pipeline
-  resourceVersion: '2841987'
-  uid: f598b8c3-ec8c-448a-9321-bbf163ce90e0
+  name: cargo-pipeline
 spec:
   tasks:
     - name: git-clone
@@ -90,7 +72,7 @@ spec:
         - name: BUILDER_IMAGE
           value: registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8
         - name: IMAGE
-          value: cargo-app-pipeline
+          value: cargo-pipeline
         - name: PATH_CONTEXT
           value: ./target
         - name: LOGLEVEL
@@ -104,13 +86,13 @@ spec:
         - name: source
           workspace: source-code
         - name: dockerconfig
-          workspace: registry-config
+          workspace: pipeline-registry-auth
     - name: buildah
       params:
         - name: IMAGE
-          value: 'default-route-openshift-image-registry.apps.$OPENSHIFT_DOMAIN/<namespace-dev>/cargo-pipeline:latest'
+          value: 'default-route-openshift-image-registry.apps.<domain>/cargo-dev-<user>/cargo-pipeline:latest'
         - name: DOCKERFILE
-          value: $(tasks.cargo-s2i.results.DOCKER_FILENAME)
+          value: $(tasks.s2i.results.DOCKER_FILENAME)
         - name: BUILD_ARGS
           value:
             - ''
@@ -145,7 +127,24 @@ spec:
         - name: source
           workspace: source-code
         - name: dockerconfig
-          workspace: registry-config
+          workspace: pipeline-registry-auth
+    - name: openshift-client
+      params:
+        - name: SCRIPT
+          value: 'oc new-app cargo-pipeline:latest -n cargo-dev-<user>'
+        - name: VERSION
+          value: latest
+      runAfter:
+        - buildah
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
   workspaces:
     - name: source-code
-    - name: registry-config
+    - name: pipeline-registry-auth

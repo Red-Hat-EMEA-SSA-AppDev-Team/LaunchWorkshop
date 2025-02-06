@@ -1,0 +1,49 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  annotations:
+    tekton.dev/tags: containers
+    tekton.dev/categories: containers
+    artifacthub.io/provider: Red Hat
+    operator.tekton.dev/last-applied-hash: 36a2c72fa64d129bc57e8ab172cabd2f1a1c4c8df9de193be25d3f022fed8bf9
+    tekton.dev/pipelines.minVersion: 0.41.0
+    artifacthub.io/category: integration-delivery
+    artifacthub.io/recommendations: |
+      - url: https://tekton.dev/
+    artifacthub.io/maintainers: |
+      - name: OpenShift Pipeline task maintainers
+        email: pipelines-extcomm@redhat.com
+  name: shell
+  labels:
+    app.kubernetes.io/version: 0.4.0
+    operator.tekton.dev/operand-name: openshift-pipelines-addons
+    operator.tekton.dev/provider-type: redhat
+spec:
+  description: This Task can be used to run a shell command
+  params:
+    - default: "echo ok"
+      description: shell command
+      name: COMMAND
+      type: string
+  stepTemplate:
+    computeResources: {}
+    env:
+      - name: WORKSPACES_SOURCE_PATH
+        value: $(workspaces.source.path)
+  steps:
+    - computeResources: {}
+      env:
+        - name: HOME
+          value: /tekton/home
+      image: 'registry.redhat.io/ubi8/ubi-minimal@sha256:c12e67af6a7e15113d76bc72f10bef2045c026c71ec8b7124c8a075458188a83'
+      name: shell-script
+      script: |
+        set -e
+        echo "executing shell command"
+        $(params.COMMAND)
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+  workspaces:
+    - description: The workspace consisting of maven project.
+      name: source
