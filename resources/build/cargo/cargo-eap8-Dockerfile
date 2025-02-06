@@ -1,0 +1,21 @@
+
+FROM registry.redhat.io/jboss-eap-8/eap8-openjdk17-builder-openshift-rhel8:latest AS builder
+
+# Set up environment variables for Galleon provisioning. 
+ENV GALLEON_PROVISION_CHANNELS org.jboss.eap.channels:eap-8.0
+ENV GALLEON_PROVISION_FEATURE_PACKS org.jboss.eap:wildfly-ee-galleon-pack,org.jboss.eap.cloud:eap-cloud-galleon-pack,org.jboss.eap:eap-datasources-galleon-pack
+ENV GALLEON_PROVISION_LAYERS cloud-default-config,embedded-activemq,postgresql-driver,postgresql-datasource
+ENV POSTGRESQL_DRIVER_VERSION 42.7.5
+# the POSTGRESQL_DRIVER_VERSION environment variable will be used by the postgresql-driver layer 
+
+# Run the S2I assemble script to build the server from downloaded maven artefacts.
+RUN /usr/local/s2i/assemble
+
+
+FROM registry.redhat.io/jboss-eap-8/eap8-openjdk17-runtime-openshift-rhel8:latest AS runtime
+COPY --from=builder --chown=jboss:root $JBOSS_HOME $JBOSS_HOME
+
+COPY --chown=jboss:root deployments/*.war $JBOSS_HOME/standalone/deployments
+RUN $JBOSS_HOME/bin/jboss-cli.sh --commands="embed-server,/subsystem=ee:write-attribute(name=spec-descriptor-property-replacement,value=true)"
+RUN $JBOSS_HOME/bin/jboss-cli.sh --commands="embed-server,/subsystem=ee/service=default-bindings:write-attribute(name=datasource,value=java:/jdbc/CargoTrackerDatabase)"
+RUN chmod -R ug+rwX $JBOSS_HOME
