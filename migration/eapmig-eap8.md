@@ -59,8 +59,8 @@ The tool updated the files: `web.xml` and `test-web.xml`
 
 ### Manual updates
 
-\> \[!TIP\]  
-\> A full scan for the `javax` and `javaee` strings in the source highlights other possible changes.
+> [!TIP]  
+> A full scan for the `javax` and `javaee` strings in the source highlights other possible changes.
 
 #### Jakarta
 
