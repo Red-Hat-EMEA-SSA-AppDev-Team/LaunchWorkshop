@@ -1,4 +1,4 @@
-## The Cargo Tracker application
+## The orginal Cargo Tracker application
 
 The Cargo Tracker application is a JEE7 legacy monolith that runs on a Glassfish and requires a java 8 runtime.
 
@@ -24,7 +24,14 @@ mvn cargo:run
 Then, open a web bowser to http://localhost:8080/cargo-tracker
 ```
 
-### The Cargo Tracker EAP app
+### Running the Cargo Tracker application in a container
+
+```plaintext
+FROM docker.io/payara/server-full:6.2023.12
+COPY target/*.war ?
+```
+
+## The Cargo Tracker application on EAP 7
 
 The Cargo Tracker application also has a slighly modified version that can be run on a JBoss EAP 7.4 server over a java 11 runtime.
 
@@ -34,7 +41,9 @@ There is a specific tag pointing to the version of the application using an inte
 
 [https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker/tree/jee7-eap7](https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker/tree/jee7-eap7)
 
-### Running the Cargo Tracker EAP application locally
+You can explore the migration steps [here](../migration/eapmig-eap7.md).
+
+### Running the Cargo Tracker EAP 7 application locally
 
 ```plaintext
 git clone https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker
@@ -52,3 +61,7 @@ If you have a JBoss EAP 7.4 server installed locally, just copy the .war file fr
 
 Then, open a web bowser to http://localhost:8080/cargo-tracker
 ```
+
+### Running the Cargo Tracker EAP 7 application on Openshift
+
+Let's start [exploring the Openshift's Build and Deployment process for the CargoTracker application.](cargo-build.md)
