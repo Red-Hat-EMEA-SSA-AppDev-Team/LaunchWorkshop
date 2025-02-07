@@ -23,3 +23,7 @@ ENV GALLEON_PROVISION_CHANNELS
 ENV GALLEON_PROVISION_FEATURE_PACKS
 ENV GALLEON_PROVISION_LAYERS
 ```
+
+### EAP XP
+
+EAP XP is an extension of Red Hat EAP (packaged as maven artifacts) that provides support for Microprofile libraries and capabilities.
