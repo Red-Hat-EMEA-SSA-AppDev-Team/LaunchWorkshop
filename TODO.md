@@ -1,54 +1,73 @@
 v0 scope
 
-*   Cargo application
+*   JEE7 monolith legacy application
 *   MTA
-
-V1 scope
-
-*   Cloud services (database)
-*   Microservices migration
-
-Vx scope
-
-*   .NET app (And OCP Virt ?)
-*   Improved Spring monolith
-*   Quarkus
-*   Python, Node
-*   Operator-driven database
+*   GitOps and Tekton
+*   Migrattion :: EAP8
 
 Backlog v0
 
 *   Centralized logging (Loki)
 *   MTA
-*   Cargo with exernal database :: Secrets and ServiceBindings
-*   Staged builds with Containerfile
-*   Tekton and GitOps
-*   Jenkins pipelines
-*   External registry
-    *   In case of External registry
-        *   Adapt cargo-build
-        *   Adapt cargo-deploy
+*   \----------------------------
+*   Instructions EAP7 and EAP8
+    *   Explain Galeon (Dockerfile)
+    *   Explain XP
+*   \-------
 *   Use of the JEE 7 glassfish app on OCP
     *   SCC security on Openshift
     *   ID and permission for volume writing and sharing (fsgroup…)  --cargo-config.md
 *   multi-containers pods (init and sidecar)
-*   enhance cargo-build.md
-    *   \-Dwildfly.statistics-enabled=true
+*   \--------
+*   External registry
+    *   In case of External registry
+        *   Adapt cargo-build
+        *   Adapt cargo-deploy
 *   \<doc jboss="" eap="" xp="">
 *   Add explanation about Image stream security (lookupStrategy)
 *   Add “Best practices for Platform Engineers" in cargo-db.md
-*   copy to Strangler
-*   ocp/\* documentations
-*   EAP XP
 *   Extras on Developer Console
     *   add pipeline
     *   add jar
+*   \--------
+*   EAP XP
+*   ocp/\* documentations
+*   copy to Strangler
+
+\-----------------------------------------------------------------------------------------------------
+
+Vx backlog
+
+*   Network policy exercice
+*   Jenkins + Other CI/CD ?
+*   Migration:: Microservices
+    *   Prereq: Externalization of activeMQ
+*   .NET app (And OCP Virt ?)
+*   Improved Spring monolith (PetClinic ?)
+*   Quarkus
+*   Python, Node
+*   Cloud services (database)
+*   Operator-driven database
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+FollowUp workshop
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+*   DevOps organization
+*   GitOps & automation
+*   Day 2
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
 Optimization workshop
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
 *   Pod placement
     *   Database on the same nodes
     *   Taints and Tolerations for GPU
-*   Network policy exercice
-*   Multi-staged podman build
+*   Using Vault with Secrets
+*   \------
 *   TSSC

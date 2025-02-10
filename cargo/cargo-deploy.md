@@ -157,9 +157,9 @@ cp resources/deploy/cargo/cargo-route-helm.yaml cargo-from-helm/templates/
 Edit values.yaml to set a value for the “app.name” and “app.image” parameters.
 
 ```plaintext
-echo "app:" > cargo-from-helm/values.yaml
-echo "  name: cargo-app-helm" >> cargo-from-helm/values.yaml
-echo "  image: 'cargo-app:latest'" >> cargo-from-helm/values.yaml
+echo "app:" &gt; cargo-from-helm/values.yaml
+echo "  name: cargo-app-helm" &gt;&gt; cargo-from-helm/values.yaml
+echo "  image: 'cargo-app:latest'" &gt;&gt; cargo-from-helm/values.yaml
 ```
 
 ```plaintext
@@ -272,6 +272,23 @@ We've just seen multiple ways to create deployments with some commands from the 
 Let's go back again to the build phase to see yet other options to creating images. 
 
 [Creating Builds with files](cargo-build-cli.md)
+
+### Deployment triggers
+
+Deployment objects are configuration elements that support the instantiation of an image.
+
+It might be interresting to have those Deployment objects react on changes occuring either on their configuration or on the underlying image (when the tag is “latest”).
+
+Openshift provides those features with annotations.  Rather than manipulating annotations directly, we can enable them with the command line:
+
+```plaintext
+oc set triggers deploy/cargo-app # list the triggers
+```
+
+```plaintext
+oc set triggers deploy/cargo-app --from-image=cargo-app:latest
+oc set triggers deploy/cargo-app --from-config
+```
 
 ### Deploying with an Operator
 

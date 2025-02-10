@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: cargo-promote
+spec:
+  tasks:
+    - name: openshift-client
+      params:
+        - name: SCRIPT
+          value: 'oc tag cargo-dev-<user>/cargo-pipeline:latest cargo-prod-<user>/cargo-pipeline:v1'
+        - name: VERSION
+          value: latest
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+    - name: openshift-client-7qb
+      params:
+        - name: SCRIPT
+          value: 'oc new-app cargo-pipeline:v1 -n cargo-prod-<user>'
+        - name: VERSION
+          value: latest
+      runAfter:
+        - openshift-client
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster

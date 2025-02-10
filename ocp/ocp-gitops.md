@@ -1,17 +1,22 @@
 Principle
 
+*   GitOps
+*   Declarative appraoch, Ansible state and ConfigAsCode
+
+ArgoCD
+
 *   App & sync
 *   Introduction to Kustomize
 *   Using Helm
+*   pull-request vs pipeline automation
 
 Best practices
 
-*   repository structure 
+*   repository structure
     *   with Kustomize
     *   with Helm
 *   multi-clusters deployment (user management, projects…)
 *   permissions
-*   pull-request vs automation
 
 Features
 

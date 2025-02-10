@@ -3,6 +3,7 @@ kind: ImageStream
 metadata:
   labels:
     build: cargo-app-bc-source-gitops
+    app: cargo-app-gitops
   name: cargo-app-gitops
 spec:
   lookupPolicy:

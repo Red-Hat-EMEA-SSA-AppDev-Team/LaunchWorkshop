@@ -1,0 +1,150 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: cargo-pipeline
+spec:
+  tasks:
+    - name: git-clone
+      params:
+        - name: url
+          value: 'https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker'
+        - name: revision
+          value: jee7-eap7
+        - name: refspec
+          value: ''
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: crtFileName
+          value: ca-bundle.crt
+        - name: subdirectory
+          value: ''
+        - name: sparseCheckoutDirectories
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: httpProxy
+          value: ''
+        - name: httpsProxy
+          value: ''
+        - name: noProxy
+          value: ''
+        - name: verbose
+          value: 'true'
+        - name: gitInitImage
+          value: 'gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2'
+        - name: userHome
+          value: /home/git
+      taskRef:
+        kind: Task
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: source-code
+    - name: maven
+      params:
+        - name: GOALS
+          value:
+            - package
+        - name: MAVEN_MIRROR_URL
+          value: ''
+        - name: SUBDIRECTORY
+          value: .
+      runAfter:
+        - git-clone
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: maven
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: source
+          workspace: source-code
+    - name: s2i
+      params:
+        - name: BUILDER_IMAGE
+          value: registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8
+        - name: IMAGE
+          value: cargo-pipeline
+        - name: PATH_CONTEXT
+          value: ./target
+        - name: LOGLEVEL
+          value: '0'
+      runAfter:
+        - maven
+      taskRef:
+        kind: Task
+        name: cargo-s2i
+      workspaces:
+        - name: source
+          workspace: source-code
+        - name: dockerconfig
+          workspace: pipeline-registry-auth
+    - name: buildah
+      params:
+        - name: IMAGE
+          value: 'default-route-openshift-image-registry.apps.<domain>/cargo-dev-<user>/cargo-pipeline:latest'
+        - name: DOCKERFILE
+          value: $(tasks.s2i.results.DOCKER_FILENAME)
+        - name: BUILD_ARGS
+          value:
+            - ''
+        - name: CONTEXT
+          value: .
+        - name: STORAGE_DRIVER
+          value: vfs
+        - name: FORMAT
+          value: oci
+        - name: BUILD_EXTRA_ARGS
+          value: ''
+        - name: PUSH_EXTRA_ARGS
+          value: ''
+        - name: SKIP_PUSH
+          value: 'false'
+        - name: TLS_VERIFY
+          value: 'true'
+        - name: VERBOSE
+          value: 'false'
+      runAfter:
+        - s2i
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: buildah
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: source
+          workspace: source-code
+        - name: dockerconfig
+          workspace: pipeline-registry-auth
+    - name: openshift-client
+      params:
+        - name: SCRIPT
+          value: 'oc new-app cargo-pipeline:latest -n cargo-dev-<user>'
+        - name: VERSION
+          value: latest
+      runAfter:
+        - buildah
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+  workspaces:
+    - name: source-code
+    - name: pipeline-registry-auth

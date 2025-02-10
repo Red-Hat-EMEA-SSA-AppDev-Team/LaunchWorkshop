@@ -7,3 +7,5 @@
 [Workshop with a Spring legacy application](strangler/strangler-index.md)
 
 [Workshop with an EAP7 legacy application](cargo/cargo-index.md)
+
+[Migrating JEE application](migration/eapmig-index.md)

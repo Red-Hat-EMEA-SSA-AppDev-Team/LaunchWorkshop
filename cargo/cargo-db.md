@@ -32,7 +32,7 @@ The image is configured to use a few environment variables.
 
 ```plaintext
 oc get images | grep postgres
-oc new-app registry.redhat.io/rhel9/postgresql-15@sha256:<imageID> -e POSTGRESQL_USER=username -e POSTGRESQL_PASSWORD=password -e POSTGRESQL_DATABASE=cargodb-test
+oc new-app registry.redhat.io/rhel9/postgresql-15@sha256:<imageid> -e POSTGRESQL_USER=username -e POSTGRESQL_PASSWORD=password -e POSTGRESQL_DATABASE=cargodb-test
 oc get pods
 ```
 
@@ -81,7 +81,7 @@ To verify that this new instance uses the external database, go to the database 
 
 To restore the state of the application, scale the database back to 1 and restart the Cargo Tracker application.
 
-\<Best practices for Platform Engineers>
+\<best practices="" for="" platform="" engineers="">
 
 #### Scaling the Cargo Tracker application
 
@@ -95,4 +95,28 @@ oc scale --replicas=3 deployment/cargo-app-postgres
 
 #### Using Secrets
 
-#### Using SeviceBindings
+Applications usually rely on environment variables to store informations related to accessing external system.  We've already seen that ConfigMaps are the best practice to move the configuration outside of the application.  But ConfigMap contains plain-text information.  When it's about storing credentials, the best practice is to use Secrets, which simply are encrypted ConfigMap.  Secrets have a type.  They are 3 types of Secrets:
+
+*   TLS : they are Secrets to store TLS certificates
+*   docker-registry: They are secrets to store dockerconfig files
+*   generic: to store anything else, which, like ConfigMap, can be any file or any key-value pair
+
+Like ConfigMaps, Secrets can be created from the WebConsole in both the Developers and Administrators perspectives, or from the command line.  
+
+In our case:
+
+```plaintext
+oc create secret generic cargo-secret --from-literal=CARGO_POSTGRES_HOST=cargo-postgres --from-literal=CARGO_POSTGRES_PORT=5432 --from-literal=CARGO_POSTGRES_NAME=cargodb --from-literal=CARGO_POSTGRES_USERNAME=username --from-literal=CARGO_POSTGRES_PASSWORD=password
+```
+
+Let's create another image from the Postgres baseline:
+
+```plaintext
+oc new-build eap74-openjdk11-openshift-rhel8~https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker#postgres --name=cargo-app-postgres
+```
+
+You can then deploy a Deployment object similar to the one used for the example of the ConfigMap, where we would simply have replaced ConfigMapKeyRef by SecretKeyRef.
+
+```plaintext
+oc apply -f resources/config/cargo/cargo-deployment-secret.yaml
+```

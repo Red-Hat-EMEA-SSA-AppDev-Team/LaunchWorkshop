@@ -1,1 +1,0 @@
-## Combining Pipelines with GitOps's ArgoCD
