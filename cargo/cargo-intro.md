@@ -8,7 +8,7 @@ The source code is available here, under the javaee7 branch:
 
 ### Running the Cargo Tracker application locally
 
-```plaintext
+```sh
 git clone https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker
 cd cargotracker
 git checkout javaee7
@@ -26,9 +26,34 @@ Then, open a web bowser to http://localhost:8080/cargo-tracker
 
 ### Running the Cargo Tracker application in a container
 
-```plaintext
-FROM docker.io/payara/server-full:6.2023.12
-COPY target/*.war ?
+The `javeee7` branch of Cargo Tracker targets the Payara version `4.1.2.181` which is not available as containerized image.
+
+At the time of writing the oldest available version of Payara server that is available on Docker Hub is the version `5.181`, but even if it is newer, it can run the application without modification.
+
+1. In the project root, create a file named `Dockerfile` with the following content:
+
+    ```dockerfile
+    FROM docker.io/payara/server-full:5.181
+    COPY target/*.war $DEPLOY_DIR
+    EXPOSE 8080
+    ```
+
+2. Build an image that bundle cargo tracker war file and payara server:
+
+    ```sh
+    podman build -t paraya-cargo .
+    ```
+
+3. Run the application:
+
+    ```sh
+    podman run --name paraya-cargo -p 8080:8080 paraya-cargo:latest
+    ```
+
+Optionally, check the application resources consumptions issuing the following command:
+
+```sh
+podman stats
 ```
 
 ## The Cargo Tracker application on EAP 7
