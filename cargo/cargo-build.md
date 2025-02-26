@@ -1,73 +1,103 @@
 ## Building applications
 
-Openshift offers multiple ways to mak a Conainer Image from an application.
+Openshift offers multiple ways to make a Container Image from an application.
 
 One way is to use the Openshift S2I process.
 
 ### Openshift S2I
 
-The Openshift Build process is based on an Object called a BuildConfig.
+The Openshift Build process is based on an Object called a `BuildConfig`.
 
 This can be created from the command line with nthe “oc new-build” command, or graphically from the Web Console, under the 'Build' menu of both the Administrator and Developer perspective.
 
 #### From the source code
 
-```plaintext
-oc new-build eap74-openjdk11-openshift-rhel8~https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker#db2 --name=cargo-app-source
+The following command triggers an image build process from the source repo:
 
+```sh
+oc new-build https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker#db2 --name=cargo-app-source --image="registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8:latest"
+```
+
+> [!NOTE]
+> The source repo ends with `#db2` to select a specific commit with the `db2` tag: in fact, this specific release relies on the default effimeral db in EAP (H2).
+
+List the build:
+
+```sh
 oc get builds
+```
+
+Inspect the build logs (find the log name from the previous result):
+
+```sh
+oc logs -f cargo-app-source-1-build
+```
+
+When the build is completed you can inspect the outcome with the following commands:
+
+```sh
 oc get images | grep cargo-app-source
 oc get is
 oc describe is cargo-app-source
 ```
 
-We'll explore multiple ways to deploy an application later.  For now, let's just use the simplest one to check that the application image was built successfully.
+##### Running the application
 
-From the Web Console, in the Developer perspective:
+We'll explore multiple ways to deploy an application later. For now, let's just use the simplest one to check that the application image was built successfully.
 
-```plaintext
-Click +Add
-Select Container Image
-Choose Image steam tag from internal registry
-Make sure to select the right project and the image stream named cargo-app-source with the “latest” tag
-```
+1. **Open** the OpenShift Web Console and make sure that the `Developer` perspective is **selected**.
 
-A pod should be deploying.  From the Topology view, click on the cargo-app-source application.  On the right side, you should see Pods, Builds, Services and Routes.
+2. **Click** `+Add`.
 
-Copy the Route URL and copy in onyour web browser, appending /cargo-tracker.
+3. **Select** `Container Images` tile.
 
-**From a java archive (.war)**
+4. **Choose** `Image stream tag from internal registry` option.
 
-Sometimes it's prefered to execute the Java/maven build externally
+    - Make sure that the **correct project** is selected.
+    - **Select** `cargo-app-source` under _Image Stream_.
+    - **Select** `latest` under _Tag_.
 
-```plaintext
+5. **Click** `Create` in the bottom bar.
+
+    A pod should be deploying.  From the `Topology` view, **click** on the `cargo-app-source` application.  On the right side, you should see `Pods`, `Builds`, `Services` and `Routes`.
+
+6. Open the application in your browser:
+
+    - **Copy** the Route URL and in your web browser address bar.
+    - **Append** `/cargo-tracker`.
+
+#### From a Java archive (.war)
+
+In some cases, it may be preferable to run the Java/Maven build externally. This option is also known as _binary 2 image_.
+
+```sh
 oc import-image registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8 --confirm
 oc new-build --binary=true --image-stream=eap74-openjdk11-openshift-rhel8 --name=cargo-app
 ```
 
 A new BuildConfig object should have been created in the namespace
 
-```plaintext
+```sh
 oc get bc
 ```
 
 Now that the process exists, we can use a .war file to trigger it
 
-```plaintext
+```sh
 git clone https://github.com/Red-Hat-EMEA-SSA-AppDev-Team/cargotracker
 cd cargotracker
 git checkout db2
 
-mvn package
-mkdir ocp ; mkdir ocp/deployments/
-mv target/*.war &gt; ocp/deployments/
+mvn clean package
+mkdir -p ocp/deployments/
+mv target/*.war ocp/deployments/
 
 oc start-build cargo-app --from-dir=./ocp --follow
 ```
 
 The build should start and create a new Container Image
 
-```plaintext
+```sh
 oc get builds
 oc get images | grep cargo-app
 oc get is
@@ -82,70 +112,70 @@ An alternative could be to build the entire image externally, then pushing the i
 
 #### Building images with podman
 
-Fo podman, we can use the following ContainerFile
+Under the folder `ocp` **create** a new file named `Containerfile` and add the following content:
 
-\--- Container file ---
-
-```plaintext
+```dockerfile
 FROM registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8:latest
-COPY *.war $JBOSS_HOME/standalone/deployments/
+COPY deployments/*.war $JBOSS_HOME/standalone/deployments/
 ```
-
-\---
 
 From the source code directory:
 
-```plaintext
+```sh
 podman login registry.redhat.io
-podman build . -t cargo-app-podman -f $/resources/build/cargo/Containerfile
+podman build ocp -t cargo-app-podman
 ```
 
-The image should be built locally.
+The image should be built locally, here how you can list all the local images:
 
-```plaintext
+```sh
 podman images
 ```
 
-We can test it locally to see if the build procss was ok.
+We can test it locally to see if the build procss was fine.
 
-```plaintext
-podman run <imageid>
+```sh
+podman run -p 8080:8080 <imageid>
 ```
 
 If so, we can push the image to a remote registry.
 
-In th case of the internal registry of the Openshift cluster, we need to first make sure the registry is exposed
+In th case of the internal registry of the Openshift cluster, we need to first make sure the registry is running and exposed:
 
-```plaintext
+```sh
 oc get pods -n openshift-image-registry
 oc get routes -n openshift-image-registry
 ```
 
-If not, we can xpose the registry by altering the Operator that manages it (we'll look at the Operator technology later).
+If there is no route, we can expose the registry by altering the _Operator Custom Resource_ that manages it (we'll look at the Operator technology later).
 
-```plaintext
+```sh
 oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
 oc get routes -n openshift-image-registry
 ```
 
 As the internal registry is secured, we also need a user with the appropriate permission to use it.  On Openshift, it corresponds to the registry-editor role.
 
-```plaintext
+```sh
 oc policy add-role-to-user registry-editor <user_name>
 ```
 
-Use the following user name and password during this workshop:
+These commands will allow Podman to log in to the OpenShift registry:
 
-TODO: \<username> \<password-token>
+```sh
+export REGISTRY=$(oc registry info)
+podman login -u $(oc whoami) -p $(oc whoami --show-token) $REGISTRY
+```
 
-Once done, we can push the image to the registry.
+Once done, we can push the image to the registry:
 
-```plaintext
-podman login <user> <token>
+> [!WARNING]
+> The image publication is going to upload a rather heavy file, for such a reason your network bandwidth could suffer concegestion.
 
-podman tag localhost/cargo-app-podman:latest default-route-openshift-image-registry.apps.<domain>/<namespace>/cargo-app-podman:latest
+```sh
+podman tag localhost/cargo-app-podman:latest $REGISTRY/cargo-tracker-prj/cargo-app-podman:latest
 
-podman push default-route-openshift-image-registry.apps.<domain>/<namespace>/cargo-app-podman:latest
+podman push $REGISTRY/cargo-tracker-prj/cargo-app-podman:latest
 
 oc get images | grep cargo-app-podman
 oc get is
@@ -164,27 +194,32 @@ When performing external docker builds, it's recommended to perform a "chained b
 
 Here is an example of such a dockerfile:
 
-```plaintext
+```dockerfile
 FROM registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8 AS builder
-COPY *.war $JBOSS_HOME/standalone/deployments/
+COPY deployments/*.war $JBOSS_HOME/standalone/deployments/
 
 FROM registry.redhat.io/jboss-eap-7/eap74-openjdk11-runtime-openshift-rhel8 AS runtime
 COPY --from=builder --chown=jboss:root $JBOSS_HOME $JBOSS_HOME
 ```
 
-To execute this build:
+Execute the build:
 
-```plaintext
-podman build . -t cargo-app-podman-chained -f $/resources/build/cargo/Containerfile-chained
-podman tag localhost/cargo-app-podman-chained:latest default-route-openshift-image-registry.apps.<domain>/<namespace>/cargo-app-podman-chained:latest
-podman push default-route-openshift-image-registry.apps.<domain>/<namespace>/cargo-app-podman-chained:latest
+```sh
+podman build ocp -t cargo-app-podman-chained -f ocp/Containerfile-chained
+```
+
+Publish the image:
+
+```sh
+podman tag localhost/cargo-app-podman-chained:latest $REGISTRY/cargo-tracker-prj/cargo-app-podman-chained:latest
+podman push $REGISTRY/cargo-tracker-prj/cargo-app-podman-chained:latest
 ```
 
 ### Using BuilderImage directly
 
 Some BuilderImage are directly accssible from th WebConsole, within the Developer perspective.
 
-```plaintext
+```
 Click +Add
 Select “All Services”
 Filter out “Builder image” from th left meny
