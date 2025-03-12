@@ -205,12 +205,15 @@ Openshift won't schedule the pod on any node and will display “Insufficient cp
 
 ### Observability
 
-Red Hat OpenShift Observability provides real-time visibility, monitoring, and analysis of various system metrics, logs, traces, and events to help users quickly diagnose and troubleshoot issues before they impact systems or applications. To help ensure the reliability, performance, and security of your applications and infrastructure, we will cover the following Red Hat OpenShift observability components:
-- Monitoring metrics
-- Aggregated logging
-- Distributed tracing and Red Hat build of OpenTelemetry
+Red Hat OpenShift Observability provides real-time visibility, monitoring, and analysis of various system metrics, logs, traces, and events to help users quickly diagnose and troubleshoot issues before they impact systems or applications. To help ensure the reliability, performance, and security of applications and infrastructure, we will cover the following observability signals:
 
-#### Monitoring metrics
+- Metrics
+- Logs
+- Traces
+
+![modern observability](../_doc-images/modern_observability.png)
+
+#### Metrics
 
 The EAP server provides a prometheus-compatible metrics endpoint out of the box.
 
@@ -248,7 +251,7 @@ spec:
 
 As we saw it, the EAP metrics are hidden behind an admin port: 9990.  Contrary to the healthchecks, Prometheus does not scrap information directly within the pod, but remotely uses the Openshift SDN network to access the pod's metrics on its HTTP interface.  Therefore, the admin port 9990 must be exposed at the Service level.
 
-##### Visualize metrics using the OpenShift console
+##### Visualizing metrics using the OpenShift web console
 
 The OpenShift web console provides a metrics panel via the _Administrator or Developer perspective -> Observe -> Metrics_ menu.
 
@@ -260,7 +263,7 @@ You should be able to observe the metrics with a view similar to the following:
 
 ![cargo-app metrics](../_doc-images/cargo-app_metrics.png)
 
-##### Visualize metrics using a Grafana dashboard
+##### Visualizing metrics using a Grafana dashboard
 
 > TODO
 
@@ -268,7 +271,7 @@ You should be able to observe the metrics with a view similar to the following:
 
 We saw earlier in the chapter about deploying applications that the EAP Operator already exposed the port 9990.  The intelligence of the Operator is not limited to the deep understanding of the runtime.  It also takes the context the application is in into account.  For example, create another EAP server using the Operator now that the Prometheus User Wokload Monitoring is enabled.  You'll see that the Operator takes that new infomation into account and automatically creates a `ServiceMonitor` object.
 
-### Centralized logging
+### Aggregated logging
 
 [Introduction to Openshift Logging](../ocp/ocp-logging.md)
 > TODO
@@ -279,13 +282,13 @@ For instance, via the _Administrator perspective_, you may query for all the app
 
 ![cargo-app aggregated logs](../_doc-images/cargo-app_aggregated-logs.png)
 
-### Distributed tracing and Red Hat build of OpenTelemetry
+### Distributed tracing with Red Hat build of OpenTelemetry
 
-[Introduction to Distributed Tracing and Red Hat build of OpenTelemetry](../ocp/ocp-opentelemetry.md)
+[Introduction to Distributed Tracing with Red Hat build of OpenTelemetry](../ocp/ocp-opentelemetry.md)
 
 > TODO
 
-#### Traces visualization using the TempoStack Jaeger UI (Red Hat Distributed Tracing Platform)
+#### Visualizing traces using the TempoStack Jaeger UI (Red Hat Distributed Tracing Platform)
 
 > *NOTE:* As of OpenShift v4.17 Distributed Tracing Platform, the Jaeger UI is deprecated and will be removed in a future release.
 
@@ -293,7 +296,7 @@ The installed TempoStack instance is enabled for multi-tenancy. For the workshop
 
 ![cargo-app distributed tracing with Jaeger UI](../_doc-images/cargo-app_jaegerui_deprecated.png)
 
-#### Traces visualization using the Cluster Observability Operator distributed tracing UI plugin
+#### Visualizing traces using the Cluster Observability Operator distributed tracing UI plugin
 
 As the Jaeger UI is deprecated, it is recommended to use the [Distributed Tracing UI Plugin](https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/cluster_observability_operator/observability-ui-plugins#distributed-tracing-ui-plugin) of the [Cluster Observability Operator](https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/cluster_observability_operator/index) to visualize the collected application traces. The  Tracing UI is available in the _Administrator perspective_ at _Observe -> Traces_.
 
