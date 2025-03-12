@@ -11,6 +11,9 @@ spec:
         streams:
         - days: 1
           priority: 1
+          selector: '{log_type="audit"}'
+        - days: 1
+          priority: 1
           selector: '{log_type="infrastructure"}'
   managementState: Managed
   replication:

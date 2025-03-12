@@ -26,5 +26,6 @@ spec:
     inputRefs:
     - application
     - infrastructure
+    - audit
     outputRefs:
     - default-lokistack
