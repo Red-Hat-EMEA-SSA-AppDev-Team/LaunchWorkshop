@@ -12,7 +12,7 @@ spec:
         - days: 1
           priority: 1
           selector: '{log_type="audit"}'
-        - days: 1
+        - days: 3
           priority: 1
           selector: '{log_type="infrastructure"}'
   managementState: Managed
@@ -26,6 +26,6 @@ spec:
     secret:
       name: logging-loki-s3
       type: s3
-  storageClassName: gp3-csi
+  storageClassName: lvms-vg1
   tenants:
     mode: openshift-logging
